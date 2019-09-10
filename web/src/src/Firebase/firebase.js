@@ -101,6 +101,11 @@ class Firebase {
   message = uid => this.db.doc(`messages/${uid}`);
 
   messages = () => this.db.collection('messages');
+
+  // Device API
+  attachTokenToDevice = (deviceId, token) => this.db.collection('tokens').add({deviceId, token});
+
+  getDeviceToken = deviceId => this.db.ref('tokens' + deviceId + '/uid');
 }
 
 export default Firebase;
