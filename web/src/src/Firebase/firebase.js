@@ -123,8 +123,7 @@ class Firebase {
   revoke = (deviceId, userId, uid) =>
     this.db
       .collection("transaction")
-      .doc(uid)
-      .update({
+      .add({payload: {
         assignDate: null,
         deviceId: deviceId,
         lendingDate: null,
@@ -132,7 +131,7 @@ class Firebase {
         returnDate: this.db.Timestamp.now,
         revokeDate: this.db.Timestamp.now,
         status: "REVOKED"
-      });
+      }});
 }
 
 export default Firebase;
