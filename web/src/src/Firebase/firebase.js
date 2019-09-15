@@ -104,6 +104,8 @@ class Firebase {
 
   // Device API
 
+  getDeviceDetail = (deviceId) => this.db.doc(`devices${deviceId}`);
+
   // this api used for generating qr code
   getDeviceId = (tokenId) => this.db.doc(tokenId);
 
