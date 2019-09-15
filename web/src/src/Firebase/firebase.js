@@ -103,6 +103,10 @@ class Firebase {
   messages = () => this.db.collection("messages");
 
   // Device API
+
+  // this api used for generating qr code
+  getDeviceId = (tokenId) => this.db.doc(tokenId);
+
   attachTokenToDevice = (deviceId, token) =>
     this.db.collection("tokens").add({ deviceId, token });
 
