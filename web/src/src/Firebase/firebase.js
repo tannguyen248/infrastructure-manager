@@ -102,6 +102,10 @@ class Firebase {
 
   messages = () => this.db.collection("messages");
 
+  // Permission
+  getPermission = (permissionId) => this.db.collection(`Permission/${permissionId}`);
+
+
   // Team API
   getTeamDetail = (teamId) = this.db.collection(`team/${teamId}`);
 
