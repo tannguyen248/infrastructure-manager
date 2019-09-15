@@ -102,9 +102,12 @@ class Firebase {
 
   messages = () => this.db.collection("messages");
 
+  // Team API
+  getTeamDetail = (teamId) = this.db.collection(`team/${teamId}`);
+
   // Device API
 
-  getDeviceDetail = (deviceId) => this.db.doc(`devices${deviceId}`);
+  getDeviceDetail = (deviceId) => this.db.doc(`devices/${deviceId}`);
 
   // this api used for generating qr code
   getDeviceId = (tokenId) => this.db.doc(tokenId);
