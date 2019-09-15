@@ -94,18 +94,44 @@ class Firebase {
 
   user = uid => this.db.doc(`users/${uid}`);
 
-  users = () => this.db.collection('users');
+  users = () => this.db.collection("users");
 
   // *** Message API ***
 
   message = uid => this.db.doc(`messages/${uid}`);
 
-  messages = () => this.db.collection('messages');
+  messages = () => this.db.collection("messages");
 
   // Device API
-  attachTokenToDevice = (deviceId, token) => this.db.collection('tokens').add({deviceId, token});
+  attachTokenToDevice = (deviceId, token) =>
+    this.db.collection("tokens").add({ deviceId, token });
 
-  getDeviceToken = deviceId => this.db.ref('tokens' + deviceId + '/uid');
+  getDeviceToken = deviceId => this.db.ref("tokens" + deviceId + "/uid");
+
+  assign = (deviceId, userId) =>
+    this.db.collection("transaction").add({
+      payload: {
+        assignDate: this.db.Timestamp.now,
+        deviceId: deviceId,
+        lendingDate: this.db.Timestamp.now,
+        ownerId: userId,
+        returnDate: null,
+        revokeDate: null,
+        status: "ASSIGNED"
+      }
+    });
+  revoke = (deviceId, userId, uid) =>
+    this.db
+      .collection("transaction")
+      .add({payload: {
+        assignDate: null,
+        deviceId: deviceId,
+        lendingDate: null,
+        ownerId: userId,
+        returnDate: this.db.Timestamp.now,
+        revokeDate: this.db.Timestamp.now,
+        status: "REVOKED"
+      }});
 }
 
 export default Firebase;
