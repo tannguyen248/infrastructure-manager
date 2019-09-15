@@ -2,18 +2,20 @@ import app from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
 
-const config = {
-  apiKey: process.env.REACT_APP_API_KEY,
-  authDomain: process.env.REACT_APP_AUTH_DOMAIN,
-  databaseURL: process.env.REACT_APP_DATABASE_URL,
-  projectId: process.env.REACT_APP_PROJECT_ID,
-  storageBucket: process.env.REACT_APP_STORAGE_BUCKET,
-  messagingSenderId: process.env.REACT_APP_MESSAGING_SENDER_ID
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBJZbv40pK9aC-Ri_lgdvzUiCVsVn5oQP4",
+  authDomain: "infrastructure-manager-5f00f.firebaseapp.com",
+  databaseURL: "https://infrastructure-manager-5f00f.firebaseio.com",
+  projectId: "infrastructure-manager-5f00f",
+  storageBucket: "infrastructure-manager-5f00f.appspot.com",
+  messagingSenderId: "947994363856",
+  appId: "1:947994363856:web:e37f9ebf6a375c7866dbd5"
 };
 
 class Firebase {
   constructor() {
-    app.initializeApp(config);
+    app.initializeApp(firebaseConfig);
 
     /* Helper */
 
@@ -99,6 +101,11 @@ class Firebase {
   message = uid => this.db.doc(`messages/${uid}`);
 
   messages = () => this.db.collection('messages');
+
+  // Device API
+  attachTokenToDevice = (deviceId, token) => this.db.collection('tokens').add({deviceId, token});
+
+  getDeviceToken = deviceId => this.db.ref('tokens' + deviceId + '/uid');
 }
 
 export default Firebase;
