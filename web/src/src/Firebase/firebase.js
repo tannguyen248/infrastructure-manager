@@ -120,18 +120,26 @@ class Firebase {
         status: "ASSIGNED"
       }
     });
+
   revoke = (deviceId, userId, uid) =>
     this.db
       .collection("transaction")
-      .add({payload: {
-        assignDate: null,
-        deviceId: deviceId,
-        lendingDate: null,
-        ownerId: userId,
-        returnDate: this.db.Timestamp.now,
-        revokeDate: this.db.Timestamp.now,
-        status: "REVOKED"
-      }});
+      .add({
+        payload: {
+          assignDate: null,
+          deviceId: deviceId,
+          lendingDate: null,
+          ownerId: userId,
+          returnDate: this.db.Timestamp.now,
+          revokeDate: this.db.Timestamp.now,
+          status: "REVOKED"
+        }
+      });
+
+  // History API
+  getHistories = () => this.db.collection("history");
+
+  addDataToHistory = (date, deviceId, event, userId) => this.db.collection("history").set({date, deviceId, event, userId});
 }
 
 export default Firebase;
