@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { View, Text, StyleSheet, Button } from 'react-native';
 import firebase from 'firebase';
-import { androidClientId } from '../config';
+import { androidClientId, iosClientId } from '../config';
 
 class LoginScreen extends Component {
   isUserEqual = (googleUser, firebaseUser) => {
@@ -83,7 +83,7 @@ class LoginScreen extends Component {
       const result = await Expo.Google.logInAsync({
         androidClientId: androidClientId,
         behavior: 'web',
-        // iosClientId: '', //enter ios client id
+        iosClientId: iosClientId, //enter ios client id
         scopes: ['profile', 'email']
       });
 

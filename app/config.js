@@ -10,3 +10,5 @@ export const firebaseConfig = {
 
 
 export const androidClientId = '947994363856-hn1iqnn9on8h8dn7sgsj6j7ibc326uaf.apps.googleusercontent.com';
+
+export const iosClientId = '947994363856-nr8inaqiu4ug53984vjiefj3ld91uuhe.apps.googleusercontent.com';
