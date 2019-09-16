@@ -1,9 +1,18 @@
 import React, { Component } from 'react';
 import { View, Text, StyleSheet, Button } from 'react-native';
 import firebase from 'firebase';
+import app from 'firebase/app';
+import 'firebase/firestore';
+
 import { androidClientId, iosClientId } from '../config';
 
 class LoginScreen extends Component {
+  db = app.firestore();
+
+  firestoreCollection = {
+    users: this.db.collection('users')
+  };
+
   isUserEqual = (googleUser, firebaseUser) => {
     if (firebaseUser) {
       var providerData = firebaseUser.providerData;
@@ -21,6 +30,8 @@ class LoginScreen extends Component {
     return false;
   };
   onSignIn = googleUser => {
+    const self = this;
+
     console.log('Google Auth Response', googleUser);
     // We need to register an Observer on Firebase Auth to make sure auth is initialized.
     var unsubscribe = firebase.auth().onAuthStateChanged(
@@ -39,24 +50,29 @@ class LoginScreen extends Component {
             .signInAndRetrieveDataWithCredential(credential)
             .then(function (result) {
               console.log('user signed in ');
+              const usersDocument = self.firestoreCollection.users.doc(result.user.uid);
+              console.log('result ============');
+              console.log(result);
               if (result.additionalUserInfo.isNewUser) {
-                firebase
-                  .database()
-                  .ref('/users/' + result.user.uid)
-                  .set({
-                    gmail: result.user.email,
-                    profile_picture: result.additionalUserInfo.profile.picture,
-                    first_name: result.additionalUserInfo.profile.given_name,
-                    last_name: result.additionalUserInfo.profile.family_name,
-                    created_at: Date.now()
+                console.log('add new user');
+
+                const newData = {
+                  email: result.user.email,
+                  id: result.user.uid,
+                  created_at: Date.now(),
+                  role: 'user'
+                };
+
+                let addDoc =
+                  usersDocument.set(newData).then(ref => {
+                    console.log('Write history successfylly with id : ', ref.id);
+                  }).catch(e => {
+                    console.log(e);
                   })
-                  .then(function (snapshot) {
-                    // console.log('Snapshot', snapshot);
-                  });
               } else {
-                firebase
-                  .database()
-                  .ref('/users/' + result.user.uid)
+                console.log('update user');
+
+                usersDocument
                   .update({
                     last_logged_in: Date.now()
                   });

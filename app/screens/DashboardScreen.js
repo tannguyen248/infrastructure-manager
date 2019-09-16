@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { View, Text, StyleSheet, Button, Alert, TouchableHighlight, ActivityIndicator } from 'react-native';
 import { Constants, BarCodeScanner, Permissions } from 'expo';
 
+import firebase from 'firebase';
 import app from 'firebase/app';
 import 'firebase/firestore';
 
@@ -10,7 +11,8 @@ export default class DashboardScreen extends Component {
     hasCameraPermission: null,
     visibleScanner: false,
     borrowButtonTitle: 'BORROW',
-    isProcessing: false
+    isProcessing: false,
+    isSuccess: false
   };
 
   db = app.firestore();
@@ -36,7 +38,7 @@ export default class DashboardScreen extends Component {
 
     let addDoc = this.firestoreCollection.history.add(newData).then(ref => {
       console.log('Write history successfylly with id : ', ref.id);
-      this._stopProcessing();
+      this._stopProcessing(true);
     }).catch(e => {
       console.log(e);
     })
@@ -118,26 +120,26 @@ export default class DashboardScreen extends Component {
     });
   }
 
-  _stopProcessing = () => {
-    this.setState({ isProcessing: false });
+  _stopProcessing = (success = false) => {
+    this.setState({ isProcessing: false, isSuccess: success });
   }
 
   _startProcessing = () => {
-    this.setState({ isProcessing: true });
+    this.setState({ isProcessing: true, isSuccess: false });
   }
 
   _checkValidDevice = async (deviceId) => {
     this.firestoreCollection.devices.doc(deviceId).get()
-    .then(snapshot => {
-      if (!snapshot || snapshot.empty || !snapshot.data()) {
-        console.log('Invalid device.');
-        Alert.alert('Invalid device', 'Not found this device!');
-        this._stopProcessing();
-        return;
-      }
+      .then(snapshot => {
+        if (!snapshot || snapshot.empty || !snapshot.data()) {
+          console.log('Invalid device.');
+          Alert.alert('Invalid device', 'Not found this device!');
+          this._stopProcessing();
+          return;
+        }
 
-      this._updateBorrowUser(deviceId);
-    });
+        this._updateBorrowUser(deviceId);
+      });
   }
 
   _handleBarCodeRead = data => {
@@ -220,6 +222,13 @@ export default class DashboardScreen extends Component {
             )
           }
 
+          {
+            !this.state.isProcessing && this.state.isSuccess && (
+              <View style={styles.resultWrapper}>
+                <Text style={styles.successText}>Success!</Text>
+              </View>
+            )
+          }
         </View>
       </View >
     );
@@ -265,5 +274,12 @@ const styles = StyleSheet.create({
   },
   spinnerWrapper: {
     alignItems: "center"
+  },
+  resultWrapper: {
+    alignItems: "center",
+  },
+  successText: {
+    color: 'green',
+    fontWeight: '700'
   }
 });
