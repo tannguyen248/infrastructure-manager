@@ -14,30 +14,24 @@ const LoginRoute = ({
   return (
     <Route
       {...rest}
-      render={
-        () => (
-          <Page pagename={pagename} auth={auth}>
-            <Login login={login} auth={auth} />{' '}
+      render={() =>
+        !auth || !auth.username ? (
+          <Page pagename={pagename}>
+            <Login login={login} auth={auth} />
           </Page>
+        ) : (
+          <Redirect
+            to={{
+              pathname: '/devices'
+            }}
+          />
         )
-        // !auth || !auth.username ? (
-        //   <Page pagename={pagename}>
-        //     <Login login={login} auth={auth} />
-        //   </Page>
-        // ) : (
-        //   <Redirect
-        //     to={{
-        //       pathname: '/devices'
-        //     }}
-        //   />
-        // )
       }
     />
   );
 };
 
 const PrivateRoute = ({ auth, pagename, component: Component, ...rest }) => {
-  console.log('auth', auth);
   return (
     <Route
       {...rest}
@@ -58,13 +52,13 @@ const PrivateRoute = ({ auth, pagename, component: Component, ...rest }) => {
   );
 };
 
-const PublicRoute = ({ pagename, component: Component, ...rest }) => {
+const PublicRoute = ({ auth, pagename, component: Component, ...rest }) => {
   return (
     <Route
       {...rest}
       render={() => (
-        <Page pagename={pagename}>
-          <Component />
+        <Page pagename={pagename} auth={auth}>
+          <Component auth={auth} />
         </Page>
       )}
     />
@@ -89,7 +83,7 @@ const Routes = ({ auth, ...rest }) => (
       component={Users}
       {...rest}
     />
-    <PrivateRoute
+    <PublicRoute
       path="/devices"
       auth={auth}
       pagename="Device Manager"

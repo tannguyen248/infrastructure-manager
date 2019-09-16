@@ -2,16 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { withRouter } from 'react-router-dom';
 import Routes from './routes';
 
-const App = props => {
-  const [auth, setAuth] = useState();
+const login = setAuth => (username, password) => {
+  if (username === 'admin' && password === 'admin') {
+    const user = { username: 'admin' };
+    sessionStorage.setItem('user', JSON.stringify(user));
+    setAuth(user);
+  }
+};
 
-  const login = setAuth => (username, password) => {
-    if (username === 'admin' && password === 'admin') {
-      const user = { username: 'admin' };
-      sessionStorage.setItem('user', JSON.stringify(user));
-      setAuth(user);
-    }
-  };
+const App = () => {
+  const [auth, setAuth] = useState(JSON.parse(sessionStorage.getItem('user')));
 
   useEffect(() => {
     if (!auth || !auth.username) {

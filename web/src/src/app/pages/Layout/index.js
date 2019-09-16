@@ -76,34 +76,27 @@ function Page(props) {
         </Typography>
       </div>
       <Divider />
-      {isLogined && (
-        <>
-          <List>
-            <ListItem
-              button
-              key={'SupervisorAccount'}
-              component={Link}
-              to="/users"
-            >
-              <ListItemIcon>
-                <SupervisorAccountIcon />
-              </ListItemIcon>
-              <ListItemText primary={'User Manager'} />
-            </ListItem>
-            <ListItem
-              button
-              key={'DevicesOther'}
-              component={Link}
-              to="/devices"
-            >
-              <ListItemIcon>
-                <DevicesOtherIcon />
-              </ListItemIcon>
-              <ListItemText primary={'Device Manager'} />
-            </ListItem>
-          </List>
-        </>
-      )}
+      <List>
+        {isLogined && (
+          <ListItem
+            button
+            key={'SupervisorAccount'}
+            component={Link}
+            to="/users"
+          >
+            <ListItemIcon>
+              <SupervisorAccountIcon />
+            </ListItemIcon>
+            <ListItemText primary={'User Manager'} />
+          </ListItem>
+        )}
+        <ListItem button key={'DevicesOther'} component={Link} to="/devices">
+          <ListItemIcon>
+            <DevicesOtherIcon />
+          </ListItemIcon>
+          <ListItemText primary={'Device Manager'} />
+        </ListItem>
+      </List>
     </div>
   );
 

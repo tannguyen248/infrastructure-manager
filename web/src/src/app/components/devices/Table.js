@@ -40,11 +40,12 @@ const handleDeviceStatus = async (
   }
 };
 
-const MaterialTableDemo = ({
+const DeviceTable = ({
   devices,
   updateDevice,
   addDevice,
-  removeDevice
+  removeDevice,
+  auth
 }) => {
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -66,14 +67,95 @@ const MaterialTableDemo = ({
         editable: 'never',
         render: rowData => {
           var isLent =
-            rowData && !!rowData.transactions.find(x => !x.returnDate);
-          return isLent ? <BlockIcon /> : <CheckCircleIcon />;
+            rowData &&
+            rowData.transaction &&
+            rowData.transaction.status === 'assigned';
+          return isLent ? (
+            <BlockIcon color="error" />
+          ) : (
+            <CheckCircleIcon color="primary" />
+          );
         }
       }
     ],
     data: [...devices]
   });
 
+  const editable = () => {
+    if (auth && auth.username === 'admin') {
+      return {
+        onRowAdd: newData =>
+          new Promise((resolve, reject) => {
+            addDevice({
+              name: newData.name,
+              imeiNumber: newData.imeiNumber,
+              model: newData.model
+            }).then(result => {
+              if (result) {
+                const data = [...state.data, { ...resolve, transactions: [] }];
+                setState({ ...state, data });
+                setSnackbar({
+                  open: true,
+                  message: 'Add successfully!',
+                  variant: 'success'
+                });
+
+                resolve();
+              } else {
+                setSnackbar({
+                  open: true,
+                  message: 'Fail!',
+                  variant: 'error'
+                });
+
+                reject();
+              }
+            });
+          }),
+        onRowUpdate: (newData, oldData) =>
+          new Promise(resolve => {
+            setTimeout(() => {
+              resolve();
+              handleDeviceStatus(
+                updateDevice,
+                oldData,
+                newData,
+                state,
+                setState,
+                setSnackbar
+              );
+            }, 600);
+          }),
+        onRowDelete: oldData =>
+          new Promise((resolve, reject) => {
+            removeDevice(oldData.id).then(result => {
+              if (result === true) {
+                const data = [...state.data];
+                data.splice(data.indexOf(oldData), 1);
+                setState({ ...state, data });
+                setSnackbar({
+                  open: true,
+                  message: 'Remove successfully!',
+                  variant: 'success'
+                });
+
+                resolve();
+              } else {
+                setSnackbar({
+                  open: true,
+                  message: 'Fail!',
+                  variant: 'error'
+                });
+
+                reject();
+              }
+            });
+          })
+      };
+    } else {
+      return {};
+    }
+  };
   return (
     <>
       <Snackbar {...snackbar} setSnackbar={setSnackbar} />
@@ -93,12 +175,13 @@ const MaterialTableDemo = ({
                       paddingLeft: 10
                     }}
                   >
-                    {rowData.transactions.map((x, index) => (
-                      <div key={index}>{`${x.email} lent on ${
-                        x.lendingDate
-                      }} and ${x.returnDate &&
-                        `returned on ${x.returnDate}`}`}</div>
-                    ))}
+                    {rowData.transaction && (
+                      <div>{`${rowData.transaction.email &&
+                        rowData.transaction.email} lent on ${new Date(
+                        rowData.transaction.lendingDate.seconds * 1000 +
+                          rowData.transaction.lendingDate.nanoseconds
+                      )}`}</div>
+                    )}
                   </div>
                   <div style={{ textAlign: 'center' }}>
                     <QRCode value={rowData.id} />
@@ -108,115 +191,14 @@ const MaterialTableDemo = ({
             }
           }
         ]}
-        // actions={[
-        //   rowData => ({
-        //     icon: 'block',
-        //     tooltip: 'Deactive User',
-        //     onClick: (event, rowData) => {
-        //       handleDeviceStatus(
-        //         updateDevice,
-        //         rowData,
-        //         state,
-        //         setState,
-        //         setSnackbar
-        //       );
-        //     },
-        //     hidden: !rowData.active
-        //   }),
-        //   rowData => ({
-        //     icon: 'check',
-        //     tooltip: 'Active User',
-        //     onClick: (event, rowData) => {
-        //       handleDeviceStatus(
-        //         updateDevice,
-        //         rowData,
-        //         state,
-        //         setState,
-        //         setSnackbar
-        //       );
-        //     },
-        //     hidden: rowData.active
-        //   })
-        // ]}
         options={{
           actionsColumnIndex: -1,
           exportButton: true
         }}
-        editable={{
-          onRowAdd: newData =>
-            new Promise((resolve, reject) => {
-              addDevice({
-                name: newData.name,
-                imeiNumber: newData.imeiNumber,
-                model: newData.model
-              }).then(result => {
-                if (result) {
-                  const data = [
-                    ...state.data,
-                    { ...resolve, transactions: [] }
-                  ];
-                  setState({ ...state, data });
-                  setSnackbar({
-                    open: true,
-                    message: 'Add successfully!',
-                    variant: 'success'
-                  });
-
-                  resolve();
-                } else {
-                  setSnackbar({
-                    open: true,
-                    message: 'Fail!',
-                    variant: 'error'
-                  });
-
-                  reject();
-                }
-              });
-            }),
-          onRowUpdate: (newData, oldData) =>
-            new Promise(resolve => {
-              setTimeout(() => {
-                resolve();
-                handleDeviceStatus(
-                  updateDevice,
-                  oldData,
-                  newData,
-                  state,
-                  setState,
-                  setSnackbar
-                );
-              }, 600);
-            }),
-          onRowDelete: oldData =>
-            new Promise((resolve, reject) => {
-              removeDevice(oldData.id).then(result => {
-                if (result === true) {
-                  const data = [...state.data];
-                  data.splice(data.indexOf(oldData), 1);
-                  setState({ ...state, data });
-                  setSnackbar({
-                    open: true,
-                    message: 'Remove successfully!',
-                    variant: 'success'
-                  });
-
-                  resolve();
-                } else {
-                  setSnackbar({
-                    open: true,
-                    message: 'Fail!',
-                    variant: 'error'
-                  });
-
-                  reject();
-                }
-              });
-            })
-        }}
+        editable={editable()}
       />
     </>
   );
 };
 
-export default MaterialTableDemo;
+export default DeviceTable;

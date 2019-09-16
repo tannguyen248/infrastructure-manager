@@ -4,7 +4,6 @@ import { withFirebase } from '../../../Firebase/context';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 const updateDevice = firebase => async (deviceId, data) => {
-  console.log(deviceId, data);
   return await firebase
     .device(deviceId)
     .update(data)
@@ -42,13 +41,13 @@ const removeDevice = firebase => async id => {
     });
 };
 
-const Devices = ({ firebase }) => {
+const Devices = ({ firebase, auth }) => {
   const [devicesState, setDevices] = useState(null);
 
   useEffect(() => {
     if (!devicesState) {
       const getData = async () => {
-        const transaction = await firebase.db
+        const transactions = await firebase.db
           .collection('transaction')
           .get()
           .then(querySnapshot => {
@@ -81,29 +80,26 @@ const Devices = ({ firebase }) => {
               if (doc) {
                 const data = doc.data();
                 if (doc.id && data) {
+                  const transaction = transactions.find(
+                    x => x.deviceId === doc.id
+                  );
+                  const user =
+                    (transaction &&
+                      users.find(x => x.id === transaction.ownerId)) ||
+                    null;
                   devices.push({
                     id: doc.id,
                     name: data.name,
                     imeiNumber: data.imeiNumber,
                     model: data.model,
-                    transactions:
-                      transaction
-                        .map(x => {
-                          if (x.deviceId === doc.id) {
-                            const user = users.find(
-                              user => user.id === x.ownerId
-                            );
-
-                            if (user) {
-                              return {
-                                email: user.email,
-                                lendingDate: x.lendingDate,
-                                returnDate: x.returnDate
-                              };
-                            }
-                          }
-                        })
-                        .filter(x => x) || []
+                    transaction:
+                      (transaction && {
+                        email: user && user.email,
+                        lendingDate: transaction.lendingDate,
+                        returnDate: transaction.returnDate,
+                        status: transaction.status
+                      }) ||
+                      null
                   });
                 }
               }
@@ -125,6 +121,7 @@ const Devices = ({ firebase }) => {
           updateDevice={updateDevice(firebase)}
           addDevice={addDevice(firebase)}
           removeDevice={removeDevice(firebase)}
+          auth={auth}
         />
       ) : (
         <CircularProgress />
