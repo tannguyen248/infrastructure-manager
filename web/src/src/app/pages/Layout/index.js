@@ -71,7 +71,7 @@ function Page(props) {
     <div>
       <div className={classes.logo}>
         {' '}
-        <Typography variant="h3" component="h3">
+        <Typography variant="h3" component="h3" component={Link} to="/">
           DM
         </Typography>
       </div>
