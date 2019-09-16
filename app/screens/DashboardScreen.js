@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet, Button, Alert, TouchableHighlight } from 'react-native';
+import { View, Text, StyleSheet, Button, Alert, TouchableHighlight, ActivityIndicator } from 'react-native';
 import { Constants, BarCodeScanner, Permissions } from 'expo';
 
 import app from 'firebase/app';
@@ -9,7 +9,8 @@ export default class DashboardScreen extends Component {
   state = {
     hasCameraPermission: null,
     visibleScanner: false,
-    borrowButtonTitle: 'BORROW'
+    borrowButtonTitle: 'BORROW',
+    isProcessing: false
   };
 
   db = app.firestore();
@@ -17,7 +18,8 @@ export default class DashboardScreen extends Component {
   firestoreCollection = {
     transaction: this.db.collection('transaction'),
     team: this.db.collection('team'),
-    history: this.db.collection('history')
+    history: this.db.collection('history'),
+    devices: this.db.collection('devices')
   };
 
   componentDidMount() {
@@ -34,7 +36,7 @@ export default class DashboardScreen extends Component {
 
     let addDoc = this.firestoreCollection.history.add(newData).then(ref => {
       console.log('Write history successfylly with id : ', ref.id);
-      this._startStopScanner();
+      this._stopProcessing();
     }).catch(e => {
       console.log(e);
     })
@@ -116,6 +118,28 @@ export default class DashboardScreen extends Component {
     });
   }
 
+  _stopProcessing = () => {
+    this.setState({ isProcessing: false });
+  }
+
+  _startProcessing = () => {
+    this.setState({ isProcessing: true });
+  }
+
+  _checkValidDevice = (deviceId) => {
+    this.firestoreCollection.devices.doc(deviceId).get()
+    .then(snapshot => {
+      if (!snapshot || snapshot.empty || !snapshot.data()) {
+        console.log('Invalid device.');
+        Alert.alert('Invalid device', 'Not found this device!');
+        this._stopProcessing();
+        return;
+      }
+
+      this._updateBorrowUser(deviceId);
+    });
+  }
+
   _handleBarCodeRead = data => {
     if (!data || !data.data) {
       Alert.alert(
@@ -126,6 +150,9 @@ export default class DashboardScreen extends Component {
       return;
     }
 
+    this._stopScanner();
+    this._startProcessing();
+
     const deviceId = data.data;
 
     try {
@@ -134,22 +161,25 @@ export default class DashboardScreen extends Component {
           if (snapshot.empty) {
             console.log('No matching documents.');
             Alert.alert('Invalid user', 'You not belong any team!');
+            this._stopProcessing();
             return;
           }
 
-          this._updateBorrowUser(deviceId);
-        })
-        .catch(err => {
-          console.log('Error getting documents', err);
+          this._checkValidDevice(deviceId);
         });
     } catch (e) {
       console.log(e);
+      this._stopProcessing();
     }
   };
 
+  _stopScanner = () => {
+    this.setState({ visibleScanner: false, borrowButtonTitle: 'BORROW' });
+  }
+
   _startStopScanner = () => {
     if (this.state.visibleScanner) {
-      this.setState({ visibleScanner: false, borrowButtonTitle: 'BORROW' });
+      this._stopScanner();
     } else {
       this.setState({ visibleScanner: true, borrowButtonTitle: 'STOP' });
     }
@@ -174,13 +204,22 @@ export default class DashboardScreen extends Component {
         }
 
         < View style={styles.buttonWrapper}>
-          <TouchableHighlight style={styles.startButton} onPress={this._startStopScanner}>
+          <TouchableHighlight style={styles.startButton} onPress={this._startStopScanner} disabled={this.state.isProcessing}>
             <Text style={styles.buttonText}>{this.state.borrowButtonTitle}</Text>
           </TouchableHighlight>
 
-          <TouchableHighlight style={styles.signoutButton} onPress={() => firebase.auth().signOut()}>
+          <TouchableHighlight style={styles.signoutButton} onPress={() => firebase.auth().signOut()} disabled={this.state.isProcessing}>
             <Text style={styles.buttonText}>Sign out</Text>
           </TouchableHighlight>
+          {
+            this.state.isProcessing && (
+              <View style={styles.spinnerWrapper}>
+                <ActivityIndicator size="large" color="#0000ff" />
+                <Text>Processing...</Text>
+              </View>
+            )
+          }
+
         </View>
       </View >
     );
@@ -223,5 +262,8 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 24,
     color: 'white'
+  },
+  spinnerWrapper: {
+    alignItems: "center"
   }
 });
