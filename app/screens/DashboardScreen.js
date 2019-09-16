@@ -68,7 +68,7 @@ export default class DashboardScreen extends Component {
           status: "assigned"
         };
 
-        let addDoc = transactionCollection.add(data).then(ref => {
+        transactionCollection.add(data).then(ref => {
           console.log('Added document with ID: ', ref.id);
 
           const history = {
@@ -126,7 +126,7 @@ export default class DashboardScreen extends Component {
     this.setState({ isProcessing: true });
   }
 
-  _checkValidDevice = (deviceId) => {
+  _checkValidDevice = async (deviceId) => {
     this.firestoreCollection.devices.doc(deviceId).get()
     .then(snapshot => {
       if (!snapshot || snapshot.empty || !snapshot.data()) {
