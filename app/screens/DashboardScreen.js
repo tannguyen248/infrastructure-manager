@@ -91,7 +91,8 @@ export default class DashboardScreen extends Component {
         ownerId: userId,
         assignedDate: now,
         lendingDate: now,
-        returnDate: now
+        returnDate: now,
+        status: "assigned"
       };
 
       snapshot.forEach(doc => {
