@@ -162,7 +162,8 @@ const DeviceTable = ({
       <MaterialTable
         title="Devices"
         columns={state.columns}
-        data={state.data}
+        // data={state.data}
+        data={devices}
         detailPanel={[
           {
             tooltip: 'Historoies',
@@ -175,13 +176,13 @@ const DeviceTable = ({
                       paddingLeft: 10
                     }}
                   >
-                    {rowData.transaction && (
+                    {/* {rowData.transaction && (
                       <div>{`${rowData.transaction.email &&
                         rowData.transaction.email} lent on ${new Date(
                         rowData.transaction.lendingDate.seconds * 1000 +
                           rowData.transaction.lendingDate.nanoseconds
                       )}`}</div>
-                    )}
+                    )} */}
                   </div>
                   <div style={{ textAlign: 'center' }}>
                     <QRCode value={rowData.id} />

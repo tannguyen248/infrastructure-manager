@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import Table from '../../components/devices/Table';
-import { withFirebase } from '../../../Firebase/context';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import React, { useEffect, useState } from 'react';
+import { withFirebase } from '../../../Firebase/context';
+import Table from '../../components/devices/Table';
 
 const updateDevice = firebase => async (deviceId, data) => {
   return await firebase
@@ -71,10 +71,41 @@ const Devices = ({ firebase, auth }) => {
             return users;
           });
 
+          const getDevices =  await firebase.devices().get().then(snapshot => {
+              const devices = [];
+                snapshot.forEach(doc => {
+                  const data = doc.data();
+                  if (doc.id && data) {
+                    const transaction = transactions.find(
+                      x => x.deviceId === doc.id
+                    );
+                    const user =
+                      (transaction &&
+                        users.find(x => x.id === transaction.ownerId)) ||
+                      null;
+
+                  devices.push({
+                    id: doc.id,
+                    name: data.name,
+                    imeiNumber: data.imeiNumber,
+                    model: data.model,
+                    transaction:
+                      (transaction && {
+                        email: user && user.email,
+                        lendingDate: transaction.lendingDate,
+                        returnDate: transaction.returnDate,
+                        status: transaction.status
+                      }) ||
+                      null
+                  });
+                }});
+              return devices;
+            });
+
+
         firebase
           .devices()
-          .get()
-          .then(querySnapshot => {
+          .onSnapshot(querySnapshot => {
             const devices = [];
             querySnapshot.forEach(doc => {
               if (doc) {
@@ -103,13 +134,40 @@ const Devices = ({ firebase, auth }) => {
                   });
                 }
               }
-            });
-
+          });
             setDevices(devices);
+          });
+
+          firebase.transaction().onSnapshot(snapshot => {
+            const devices = [];
+            debugger;
+            snapshot.forEach(doc => {
+              if (doc) {
+                const storage = getDevices;
+                const data = doc.data();
+                if (doc.id && data) {
+                  const { deviceId, status } = doc.data();
+                  if (storage) {
+                    const device = storage.find(x => x.id === deviceId);
+                    if (device) {
+                      // if (device.transaction) {
+                      //   device.transaction.status = status;
+                      // }
+                      device['transaction'] = {};
+                      device.transaction['status'] = status;
+                    }
+                    devices.push(device);
+                  }
+                }
+              }
+            });
+              setDevices(devices);
           });
       };
 
       getData();
+
+
     }
   }, [devicesState]);
 
