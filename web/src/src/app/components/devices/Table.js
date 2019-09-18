@@ -176,13 +176,13 @@ const DeviceTable = ({
                       paddingLeft: 10
                     }}
                   >
-                    {/* {rowData.transaction && (
+                    {rowData.transaction && (
                       <div>{`${rowData.transaction.email &&
-                        rowData.transaction.email} lent on ${new Date(
+                        rowData.transaction.email} lent on ${rowData.transaction.lendingDate ? new Date(
                         rowData.transaction.lendingDate.seconds * 1000 +
                           rowData.transaction.lendingDate.nanoseconds
-                      )}`}</div>
-                    )} */}
+                      ) : 'N/A'}`}</div>
+                    )}
                   </div>
                   <div style={{ textAlign: 'center' }}>
                     <QRCode value={rowData.id} />

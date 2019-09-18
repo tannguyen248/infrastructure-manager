@@ -56,6 +56,7 @@ const Devices = ({ firebase, auth }) => {
               transaction.push(doc.data());
             });
 
+            console.log('transaction', transaction);
             return transaction;
           });
 
@@ -139,22 +140,29 @@ const Devices = ({ firebase, auth }) => {
           });
 
           firebase.transaction().onSnapshot(snapshot => {
+            console.log('onSnapshot');
             const devices = [];
-            debugger;
+
             snapshot.forEach(doc => {
               if (doc) {
                 const storage = getDevices;
                 const data = doc.data();
                 if (doc.id && data) {
-                  const { deviceId, status } = doc.data();
+                  const { deviceId, status, lendingDate, returnDate, ownerId } = data;
                   if (storage) {
                     const device = storage.find(x => x.id === deviceId);
                     if (device) {
                       // if (device.transaction) {
                       //   device.transaction.status = status;
                       // }
-                      device['transaction'] = {};
+                      // device['transaction'] = {};
                       device.transaction['status'] = status;
+                      device.transaction['lendingDate'] = lendingDate;
+                      device.transaction['returnDate'] = returnDate;
+
+                      const user = users.find(x => x.id === ownerId);
+
+                      device.transaction['email'] = user ? user.email : device.transaction['email'];
                     }
                     devices.push(device);
                   }
