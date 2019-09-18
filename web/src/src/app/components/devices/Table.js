@@ -181,6 +181,7 @@ const DeviceTable = ({
                         rowData.transaction.email} lent on ${rowData.transaction.lendingDate ? new Date(
                         rowData.transaction.lendingDate.seconds * 1000 +
                           rowData.transaction.lendingDate.nanoseconds
+
                       ) : 'N/A'}`}</div>
                     )}
                   </div>

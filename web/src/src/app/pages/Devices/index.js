@@ -41,6 +41,12 @@ const removeDevice = firebase => async id => {
     });
 };
 
+const getDeviceWithId = firebase => async deviceId => {
+    return await firebase.device(deviceId).then(snapshot => {
+      return snapshot.data();
+    });
+}
+
 const Devices = ({ firebase, auth }) => {
   const [devicesState, setDevices] = useState(null);
 
@@ -68,7 +74,6 @@ const Devices = ({ firebase, auth }) => {
             querySnapshot.forEach(function(doc) {
               users.push({ id: doc.id, ...doc.data() });
             });
-
             return users;
           });
 
@@ -140,10 +145,9 @@ const Devices = ({ firebase, auth }) => {
           });
 
           firebase.transaction().onSnapshot(snapshot => {
-            console.log('onSnapshot');
             const devices = [];
 
-            snapshot.forEach(doc => {
+            snapshot.forEach(async doc => {
               if (doc) {
                 const storage = getDevices;
                 const data = doc.data();
@@ -155,7 +159,7 @@ const Devices = ({ firebase, auth }) => {
                       // if (device.transaction) {
                       //   device.transaction.status = status;
                       // }
-                      // device['transaction'] = {};
+                      device['transaction'] = {};
                       device.transaction['status'] = status;
                       device.transaction['lendingDate'] = lendingDate;
                       device.transaction['returnDate'] = returnDate;
@@ -163,8 +167,8 @@ const Devices = ({ firebase, auth }) => {
                       const user = users.find(x => x.id === ownerId);
 
                       device.transaction['email'] = user ? user.email : device.transaction['email'];
+                      devices.push(device);
                     }
-                    devices.push(device);
                   }
                 }
               }
