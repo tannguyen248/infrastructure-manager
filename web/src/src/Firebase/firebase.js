@@ -102,6 +102,8 @@ class Firebase {
 
   transaction = () => this.db.collection('transaction');
 
+  transactionWithId = (id) => this.db.doc(`transaction/${id}`);
+
   // *** Message API ***
 
   message = uid => this.db.doc(`messages/${uid}`);
