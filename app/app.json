@@ -1,9 +1,9 @@
 {
   "expo": {
-    "name": "expo-google-login-youtube",
-    "slug": "expo-google-login-youtube",
+    "name": "infrastructure-management",
+    "slug": "infrastructure-management",
     "privacy": "public",
-    "sdkVersion": "32.0.0",
+    "sdkVersion": "35.0.0",
     "platforms": [
       "ios",
       "android"
@@ -20,10 +20,11 @@
       "fallbackToCacheTimeout": 0
     },
     "assetBundlePatterns": [
-      "**/*"
+      "assets/*"
     ],
     "ios": {
       "supportsTablet": true
-    }
+    },
+    "description": "The app to manage infrastructure"
   }
 }
