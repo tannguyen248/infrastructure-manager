@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 import { View, Text, StyleSheet, Button, Alert, TouchableHighlight, ActivityIndicator } from 'react-native';
-import { Constants, BarCodeScanner, Permissions } from 'expo';
-
+import Constants from 'expo-constants';
+import { BarCodeScanner } from 'expo-barcode-scanner';
 import firebase from 'firebase';
 import app from 'firebase/app';
 import 'firebase/firestore';
+import * as Permissions from 'expo-permissions';
 
 export default class DashboardScreen extends Component {
   state = {
@@ -198,7 +199,7 @@ export default class DashboardScreen extends Component {
               this.state.hasCameraPermission === false ?
                 <Text>Camera permission is not granted</Text> :
                 <BarCodeScanner
-                  onBarCodeRead={this._handleBarCodeRead}
+                  onBarCodeScanned={this._handleBarCodeRead}
                   style={{ height: 200, width: 200 }}
                 />
             }
