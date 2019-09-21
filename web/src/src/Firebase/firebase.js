@@ -2,15 +2,14 @@ import app from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
 
-
 const firebaseConfig = {
-  apiKey: "AIzaSyBJZbv40pK9aC-Ri_lgdvzUiCVsVn5oQP4",
-  authDomain: "infrastructure-manager-5f00f.firebaseapp.com",
-  databaseURL: "https://infrastructure-manager-5f00f.firebaseio.com",
-  projectId: "infrastructure-manager-5f00f",
-  storageBucket: "infrastructure-manager-5f00f.appspot.com",
-  messagingSenderId: "947994363856",
-  appId: "1:947994363856:web:e37f9ebf6a375c7866dbd5"
+  apiKey: 'AIzaSyBJZbv40pK9aC-Ri_lgdvzUiCVsVn5oQP4',
+  authDomain: 'infrastructure-manager-5f00f.firebaseapp.com',
+  databaseURL: 'https://infrastructure-manager-5f00f.firebaseio.com',
+  projectId: 'infrastructure-manager-5f00f',
+  storageBucket: 'infrastructure-manager-5f00f.appspot.com',
+  messagingSenderId: '947994363856',
+  appId: '1:947994363856:web:e37f9ebf6a375c7866dbd5'
 };
 
 class Firebase {
@@ -90,17 +89,24 @@ class Firebase {
       }
     });
 
+  db = () => this.db;
   // *** User API ***
 
   user = uid => this.db.doc(`users/${uid}`);
 
-  users = () => this.db.collection("users");
+  users = () => this.db.collection('users');
+
+  device = uid => this.db.doc(`devices/${uid}`);
+
+  devices = () => this.db.collection('devices');
+
+  transaction = () => this.db.collection('transaction');
 
   // *** Message API ***
 
   message = uid => this.db.doc(`messages/${uid}`);
 
-  messages = () => this.db.collection("messages");
+  messages = () => this.db.collection('messages');
 
   // Permission
   getPermission = (permissionId) => this.db.collection(`Permission/${permissionId}`);
@@ -117,12 +123,12 @@ class Firebase {
   getDeviceId = (tokenId) => this.db.doc(tokenId);
 
   attachTokenToDevice = (deviceId, token) =>
-    this.db.collection("tokens").add({ deviceId, token });
+    this.db.collection('tokens').add({ deviceId, token });
 
-  getDeviceToken = deviceId => this.db.ref("tokens" + deviceId + "/uid");
+  getDeviceToken = deviceId => this.db.ref('tokens' + deviceId + '/uid');
 
   assign = (deviceId, userId) =>
-    this.db.collection("transaction").add({
+    this.db.collection('transaction').add({
       payload: {
         assignDate: this.db.Timestamp.now,
         deviceId: deviceId,
@@ -130,11 +136,12 @@ class Firebase {
         ownerId: userId,
         returnDate: null,
         revokeDate: null,
-        status: "ASSIGNED"
+        status: 'ASSIGNED'
       }
     });
 
   revoke = (deviceId, userId, uid) =>
+
     this.db
       .collection("transaction")
       .add({
