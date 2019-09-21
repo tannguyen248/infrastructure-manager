@@ -3,6 +3,29 @@ import React, { useEffect, useState } from 'react';
 import { withFirebase } from '../../../Firebase/context';
 import Table from '../../components/devices/Table';
 
+const revokeDevice = firebase => async (deviceId) => {
+  const transaction =  await firebase.revoke(deviceId).get().then(snapshot => {
+    const transactions = [];
+    snapshot.forEach(doc => {
+      transactions.push({ id: doc.id, ...doc.data() });
+    });
+    return transactions[0];
+  });
+  console.log('transaction ', transaction);
+  const revokeResult = await firebase.transactionWithId(transaction.id).update({
+    returnDate: null,
+    lendingDate: null,
+    status: '',
+    ownerId: '',
+    email: ''
+  }).then(result => {
+    return true;
+  }).catch(err => {
+    console.error('Error while updating transaction', err);
+    return false;
+  })
+}
+
 const updateDevice = firebase => async (deviceId, data) => {
   return await firebase
     .device(deviceId)
@@ -96,11 +119,17 @@ const useDataSource = firebase => {
           id: doc.id,
           ...doc.data()
         };
-      })
+      }).catch(err => {
+        console.error('Error while getting device ', err);
+      });
       return device;
     }
 
     const getUserWithId = async ownerId => {
+      if (!ownerId) {
+        return;
+      }
+
       if (localStorage.getItem(ownerId)) {
         return JSON.parse(localStorage.getItem(ownerId));
       }
@@ -162,6 +191,7 @@ const Devices = ({ firebase, auth }) => {
           updateDevice={updateDevice(firebase)}
           addDevice={addDevice(firebase)}
           removeDevice={removeDevice(firebase)}
+          revokeDevice={revokeDevice(firebase)}
           auth={auth}
         />
       ) : (

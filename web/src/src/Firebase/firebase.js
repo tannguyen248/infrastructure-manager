@@ -129,18 +129,8 @@ class Firebase {
       }
     });
 
-  revoke = (deviceId, userId, uid) =>
-    this.db.collection('transaction').add({
-      payload: {
-        assignDate: null,
-        deviceId: deviceId,
-        lendingDate: null,
-        ownerId: userId,
-        returnDate: this.db.Timestamp.now,
-        revokeDate: this.db.Timestamp.now,
-        status: 'REVOKED'
-      }
-    });
+  revoke = (deviceId) =>
+    this.db.collection('transaction').where('deviceId', '==', deviceId);
 }
 
 export default Firebase;

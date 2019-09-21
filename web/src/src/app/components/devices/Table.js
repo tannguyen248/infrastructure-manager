@@ -45,6 +45,7 @@ const DeviceTable = ({
   updateDevice,
   addDevice,
   removeDevice,
+  revokeDevice,
   auth
 }) => {
   const [snackbar, setSnackbar] = useState({
@@ -76,7 +77,7 @@ const DeviceTable = ({
             <CheckCircleIcon color="primary" />
           );
         }
-      }
+      },
     ],
     data: [...devices]
   });
@@ -162,7 +163,7 @@ const DeviceTable = ({
       <MaterialTable
         title="Devices"
         columns={state.columns}
-        // data={state.data}
+        data={state.data}
         data={devices}
         detailPanel={[
           {
@@ -194,6 +195,34 @@ const DeviceTable = ({
           exportButton: true
         }}
         editable={editable()}
+        actions={[{
+          icon: 'cached',
+          tooltip: 'Revoke device',
+          onClick: (event, rowData) => new Promise((resolve, reject) => {
+            revokeDevice(rowData.id).then(result =>{
+              if (result) {
+                setSnackbar({
+                  open: true,
+                  message: 'Revoked device successfully!',
+                  variant: 'success'
+                });
+
+                resolve();
+              } else {
+                setSnackbar({
+                  open: true,
+                  message: 'Fail to revoke device!',
+                  variant: 'error'
+                });
+
+                reject();
+              }
+            }
+            )
+          }),
+          disabled: auth && auth.username !== 'admin'
+        }
+        ]}  
       />
     </>
   );
