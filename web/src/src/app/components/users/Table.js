@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import MaterialTable from 'material-table';
 import Snackbar from '../shared/Snackbar';
 import { stat } from 'fs';
+import { sortBy } from '../../helper';
 
 const handleUserStatus = async (
   updateUser,
@@ -80,7 +81,7 @@ const MaterialTableDemo = ({ users, updateUser }) => {
                     paddingLeft: 10
                   }}
                 >
-                  {rowData.histories &&
+                  {rowData.histories && sortBy(rowData.histories,  {prop: 'date'}) &&
                     rowData.histories.map((x, index) => (
                       <div key={index}>{`${x.name} ${x.imei} is ${
                         x.event
@@ -132,15 +133,15 @@ const MaterialTableDemo = ({ users, updateUser }) => {
         }}
         editable={
           {
-            // onRowAdd: newData =>
-            //   new Promise(resolve => {
-            //     setTimeout(() => {
-            //       resolve();
-            //       const data = [...state.data];
-            //       data.push(newData);
-            //       setState({ ...state, data });
-            //     }, 600);
-            //   }),
+            onRowAdd: newData =>
+              new Promise( (resolve, reject) => {
+                setTimeout(() => {
+                  resolve();
+                  const data = [...state.data];
+                  data.push(newData);
+                  setState({ ...state, data });
+                }, 600);
+              }),
             // onRowUpdate: (newData, oldData) =>
             //   new Promise(resolve => {
             //     setTimeout(() => {

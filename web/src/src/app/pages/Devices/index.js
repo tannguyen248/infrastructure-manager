@@ -54,7 +54,7 @@ const revokeDevice = firebase => async (deviceId, transactionId) => {
   console.log('transaction owner id', transaction.ownerId);
   console.log('transaction device id', transaction.deviceId);
   const historyAdded = await firebase.addDataToHistory({
-    date: null,
+    date: new Date(),
     deviceId: transaction.deviceId,
     event: 'returned',
     userId: transaction.ownerId
