@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet, Button } from 'react-native';
+import { View, StyleSheet, Button } from 'react-native';
 import firebase from 'firebase';
 import app from 'firebase/app';
 import 'firebase/firestore';
+
+import * as Google from 'expo-google-app-auth';
 
 import { androidClientId, iosClientId } from '../config';
 
@@ -96,7 +98,7 @@ class LoginScreen extends Component {
   };
   signInWithGoogleAsync = async () => {
     try {
-      const result = await Expo.Google.logInAsync({
+      const result = await Google.logInAsync({
         androidClientId: androidClientId,
         behavior: 'web',
         iosClientId: iosClientId, //enter ios client id
