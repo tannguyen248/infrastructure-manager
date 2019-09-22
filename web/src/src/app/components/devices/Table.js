@@ -65,6 +65,14 @@ const DeviceTable = ({
         field: 'available',
         title: 'Available',
         editable: 'never',
+        customSort: (rowData1, rowData2) => {
+          var isLent1 =
+            rowData1.transaction && rowData1.transaction.status === 'assigned';
+          var isLent2 =
+            rowData2.transaction && rowData2.transaction.status === 'assigned';
+
+          return isLent1 === isLent2 ? 0 : isLent1 ? 1 : -1;
+        },
         render: rowData => {
           var isLent =
             rowData &&
@@ -178,11 +186,9 @@ const DeviceTable = ({
                   >
                     {rowData.transaction && (
                       <div>{`${rowData.transaction.email &&
-                        rowData.transaction.email} lent on ${rowData.transaction.lendingDate ? new Date(
-                        rowData.transaction.lendingDate.seconds * 1000 +
-                          rowData.transaction.lendingDate.nanoseconds
-
-                      ) : 'N/A'}`}</div>
+                        rowData.transaction.email} lent on ${rowData.transaction
+                        .lendingDate &&
+                        rowData.transaction.lendingDate.toDate()}`}</div>
                     )}
                   </div>
                   <div style={{ textAlign: 'center' }}>
@@ -195,7 +201,7 @@ const DeviceTable = ({
         ]}
         options={{
           actionsColumnIndex: -1,
-          exportButton: true
+          sorting: true
         }}
         editable={editable()}
       />

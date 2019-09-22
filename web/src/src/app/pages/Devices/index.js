@@ -42,146 +42,83 @@ const removeDevice = firebase => async id => {
 };
 
 const getDeviceWithId = firebase => async deviceId => {
-    return await firebase.device(deviceId).then(snapshot => {
-      return snapshot.data();
-    });
-}
+  return await firebase.device(deviceId).then(snapshot => {
+    return snapshot.data();
+  });
+};
 
 const Devices = ({ firebase, auth }) => {
   const [devicesState, setDevices] = useState(null);
+  const [transactionsState, setTransactions] = useState(null);
+  // const [usersState, setUsers] = useState(null);
 
   useEffect(() => {
-    if (!devicesState) {
-      const getData = async () => {
-        const transactions = await firebase.db
-          .collection('transaction')
-          .get()
-          .then(querySnapshot => {
-            var transaction = [];
-            querySnapshot.forEach(function(doc) {
-              transaction.push(doc.data());
+    const unsubcribe = firebase.transaction().onSnapshot(snapshot => {
+      const transactions = [];
+
+      snapshot.forEach(doc => {
+        if (doc) {
+          transactions.push({
+            id: doc.id,
+            ...doc.data()
+          });
+        }
+      });
+
+      setTransactions(transactions);
+    });
+
+    return () => {
+      unsubcribe && unsubcribe();
+    };
+  }, []);
+
+  // useEffect(() => {
+  //   const unsubcribe = firebase.db
+  //     .collection('users')
+  //     .onSnapshot(querySnapshot => {
+  //       var users = [];
+  //       querySnapshot.forEach(function(doc) {
+  //         users.push({ id: doc.id, ...doc.data() });
+  //       });
+
+  //       setUsers(users);
+  //     });
+
+  //   return () => {
+  //     unsubcribe && unsubcribe();
+  //   };
+  // });
+
+  useEffect(() => {
+    const unsubscribe = firebase.devices().onSnapshot(snapshot => {
+      const devices = [];
+      snapshot.forEach(doc => {
+        if (doc) {
+          const data = doc.data();
+          if (doc.id && data) {
+            const transaction =
+              transactionsState &&
+              transactionsState.find(x => x.deviceId === doc.id);
+
+            devices.push({
+              id: doc.id,
+              name: data.name,
+              imeiNumber: data.imeiNumber,
+              model: data.model,
+              transaction: transaction && { ...transaction }
             });
+          }
+        }
+      });
 
-            console.log('transaction', transaction);
-            return transaction;
-          });
+      setDevices(devices);
+    });
 
-        const users = await firebase.db
-          .collection('users')
-          .get()
-          .then(querySnapshot => {
-            var users = [];
-            querySnapshot.forEach(function(doc) {
-              users.push({ id: doc.id, ...doc.data() });
-            });
-            return users;
-          });
-
-          const getDevices =  await firebase.devices().get().then(snapshot => {
-              const devices = [];
-                snapshot.forEach(doc => {
-                  const data = doc.data();
-                  if (doc.id && data) {
-                    const transaction = transactions.find(
-                      x => x.deviceId === doc.id
-                    );
-                    const user =
-                      (transaction &&
-                        users.find(x => x.id === transaction.ownerId)) ||
-                      null;
-
-                  devices.push({
-                    id: doc.id,
-                    name: data.name,
-                    imeiNumber: data.imeiNumber,
-                    model: data.model,
-                    transaction:
-                      (transaction && {
-                        email: user && user.email,
-                        lendingDate: transaction.lendingDate,
-                        returnDate: transaction.returnDate,
-                        status: transaction.status
-                      }) ||
-                      null
-                  });
-                }});
-              return devices;
-            });
-
-
-        firebase
-          .devices()
-          .onSnapshot(querySnapshot => {
-            const devices = [];
-            querySnapshot.forEach(doc => {
-              if (doc) {
-                const data = doc.data();
-                if (doc.id && data) {
-                  const transaction = transactions.find(
-                    x => x.deviceId === doc.id
-                  );
-                  const user =
-                    (transaction &&
-                      users.find(x => x.id === transaction.ownerId)) ||
-                    null;
-                  devices.push({
-                    id: doc.id,
-                    name: data.name,
-                    imeiNumber: data.imeiNumber,
-                    model: data.model,
-                    transaction:
-                      (transaction && {
-                        email: user && user.email,
-                        lendingDate: transaction.lendingDate,
-                        returnDate: transaction.returnDate,
-                        status: transaction.status
-                      }) ||
-                      null
-                  });
-                }
-              }
-          });
-            setDevices(devices);
-          });
-
-          firebase.transaction().onSnapshot(snapshot => {
-            const devices = [];
-
-            snapshot.forEach(async doc => {
-              if (doc) {
-                const storage = getDevices;
-                const data = doc.data();
-                if (doc.id && data) {
-                  const { deviceId, status, lendingDate, returnDate, ownerId } = data;
-                  if (storage) {
-                    const device = storage.find(x => x.id === deviceId);
-                    if (device) {
-                      // if (device.transaction) {
-                      //   device.transaction.status = status;
-                      // }
-                      device['transaction'] = {};
-                      device.transaction['status'] = status;
-                      device.transaction['lendingDate'] = lendingDate;
-                      device.transaction['returnDate'] = returnDate;
-
-                      const user = users.find(x => x.id === ownerId);
-
-                      device.transaction['email'] = user ? user.email : device.transaction['email'];
-                      devices.push(device);
-                    }
-                  }
-                }
-              }
-            });
-              setDevices(devices);
-          });
-      };
-
-      getData();
-
-
-    }
-  }, [devicesState]);
+    return () => {
+      unsubscribe && unsubscribe();
+    };
+  }, [transactionsState]);
 
   return (
     <>

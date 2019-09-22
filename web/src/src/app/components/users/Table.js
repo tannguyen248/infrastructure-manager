@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import MaterialTable from 'material-table';
 import Snackbar from '../shared/Snackbar';
+import { stat } from 'fs';
 
 const handleUserStatus = async (
   updateUser,
@@ -39,7 +40,6 @@ const handleUserStatus = async (
 };
 
 const MaterialTableDemo = ({ users, updateUser }) => {
-  console.log(users);
   const [snackbar, setSnackbar] = useState({
     open: false,
     variant: '',
@@ -59,6 +59,8 @@ const MaterialTableDemo = ({ users, updateUser }) => {
     data: [...users]
   });
 
+  console.log([...users]);
+  console.log(state.data);
   return (
     <>
       <Snackbar {...snackbar} setSnackbar={setSnackbar} />
@@ -70,6 +72,7 @@ const MaterialTableDemo = ({ users, updateUser }) => {
           {
             tooltip: 'Historoies',
             render: rowData => {
+              console.log(rowData);
               return (
                 <div
                   style={{
@@ -77,11 +80,12 @@ const MaterialTableDemo = ({ users, updateUser }) => {
                     paddingLeft: 10
                   }}
                 >
-                  {rowData.histories.map((x, index) => (
-                    <div
-                      key={index}
-                    >{`${x.name} ${x.imei} is ${x.event} on ${x.date}}`}</div>
-                  ))}
+                  {rowData.histories &&
+                    rowData.histories.map((x, index) => (
+                      <div key={index}>{`${x.name} ${x.imei} is ${
+                        x.event
+                      } on ${x.date.toDate()}}`}</div>
+                    ))}
                 </div>
               );
             }

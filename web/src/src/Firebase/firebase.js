@@ -109,18 +109,18 @@ class Firebase {
   messages = () => this.db.collection('messages');
 
   // Permission
-  getPermission = (permissionId) => this.db.collection(`Permission/${permissionId}`);
-
+  getPermission = permissionId =>
+    this.db.collection(`Permission/${permissionId}`);
 
   // Team API
-  getTeamDetail = (teamId) = this.db.collection(`team/${teamId}`);
+  getTeamDetail = teamId => this.db.collection(`team/${teamId}`);
 
   // Device API
 
-  getDeviceDetail = (deviceId) => this.db.doc(`devices/${deviceId}`);
+  getDeviceDetail = deviceId => this.db.doc(`devices/${deviceId}`);
 
   // this api used for generating qr code
-  getDeviceId = (tokenId) => this.db.doc(tokenId);
+  getDeviceId = tokenId => this.db.doc(tokenId);
 
   attachTokenToDevice = (deviceId, token) =>
     this.db.collection('tokens').add({ deviceId, token });
@@ -141,25 +141,23 @@ class Firebase {
     });
 
   revoke = (deviceId, userId, uid) =>
-
-    this.db
-      .collection("transaction")
-      .add({
-        payload: {
-          assignDate: null,
-          deviceId: deviceId,
-          lendingDate: null,
-          ownerId: userId,
-          returnDate: this.db.Timestamp.now,
-          revokeDate: this.db.Timestamp.now,
-          status: "REVOKED"
-        }
-      });
+    this.db.collection('transaction').add({
+      payload: {
+        assignDate: null,
+        deviceId: deviceId,
+        lendingDate: null,
+        ownerId: userId,
+        returnDate: this.db.Timestamp.now,
+        revokeDate: this.db.Timestamp.now,
+        status: 'REVOKED'
+      }
+    });
 
   // History API
-  getHistories = () => this.db.collection("history");
+  getHistories = () => this.db.collection('history');
 
-  addDataToHistory = (date, deviceId, event, userId) => this.db.collection("history").set({date, deviceId, event, userId});
+  addDataToHistory = (date, deviceId, event, userId) =>
+    this.db.collection('history').set({ date, deviceId, event, userId });
 }
 
 export default Firebase;
