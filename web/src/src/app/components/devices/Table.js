@@ -45,6 +45,7 @@ const DeviceTable = ({
   updateDevice,
   addDevice,
   removeDevice,
+  revokeDevice,
   auth
 }) => {
   const [snackbar, setSnackbar] = useState({
@@ -204,6 +205,29 @@ const DeviceTable = ({
           sorting: true
         }}
         editable={editable()}
+        actions= {[{
+          icon: 'refresh',
+          tooltip: 'Revoke this device',
+          onClick: (e, rowData) => new Promise((resolve, reject) => {
+            revokeDevice(rowData.id, rowData.transaction.id).then(result => {
+              if (result === true) {
+                setSnackbar({
+                  open: true,
+                  message: 'Revoke device successfully!',
+                  variant: 'success'
+                });
+                resolve();
+              } else {
+                setSnackbar({
+                  open: true,
+                  message: 'Failed to revoke device!',
+                  variant: 'error'
+                });
+                reject();
+              }
+            })
+          })
+        }]}
       />
     </>
   );

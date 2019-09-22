@@ -47,6 +47,34 @@ const getDeviceWithId = firebase => async deviceId => {
   });
 };
 
+const revokeDevice = firebase => async (deviceId, transactionId) => {
+  const transaction = await firebase.getTransaction(transactionId).get().then(doc => ({id: doc.id, ...doc.data()}));
+  console.log(transactionId);
+  console.log('transaction id', transaction.id);
+  console.log('transaction owner id', transaction.ownerId);
+  console.log('transaction device id', transaction.deviceId);
+  const historyAdded = await firebase.addDataToHistory({
+    date: null,
+    deviceId: transaction.deviceId,
+    event: 'returned',
+    userId: transaction.ownerId
+  }).then(res => {
+    return true;
+  }).catch(err => {
+    return false;
+  })
+
+  if (historyAdded) {
+    firebase.getTransaction(transactionId).update({
+      ownerId: '',
+      status: '',
+      lendingDate: null,
+      returnDate: null,
+      email: ''
+    }).then(() => true).catch(err => false);
+  }
+}
+
 const Devices = ({ firebase, auth }) => {
   const [devicesState, setDevices] = useState(null);
   const [transactionsState, setTransactions] = useState(null);
@@ -128,6 +156,7 @@ const Devices = ({ firebase, auth }) => {
           updateDevice={updateDevice(firebase)}
           addDevice={addDevice(firebase)}
           removeDevice={removeDevice(firebase)}
+          revokeDevice={revokeDevice(firebase)}
           auth={auth}
         />
       ) : (
