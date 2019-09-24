@@ -207,7 +207,7 @@ const DeviceTable = ({
         }}
         editable={editable()}
         actions= {[{
-          icon: 'refresh',
+          icon: 'cached',
           tooltip: 'Revoke this device',
           onClick: (e, rowData) => new Promise((resolve, reject) => {
             if (rowData.transaction.status === '') {

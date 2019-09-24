@@ -15,6 +15,14 @@ const updateUser = firebase => async (userId, data) => {
     });
 };
 
+const deactiveUser = firebase => async (email) => {
+  const userTeam = await firebase.firestore.collection('team').where('email', '==', email).get().then(snapshot => {
+    return snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}))[0];
+  });
+
+  return await firebase.firestore.doc(`team/${userTeam.id}`).delete().then(() => true).catch(err => false);
+}
+
 const Users = ({ firebase }) => {
   const [usersState, setUsers] = useState(null);
   const [historiesState, setHistories] = useState(null);
@@ -100,7 +108,11 @@ const Users = ({ firebase }) => {
   return (
     <>
       {usersState ? (
-        <Table users={usersState} updateUser={updateUser(firebase)} />
+        <Table 
+          users={usersState} 
+          updateUser={updateUser(firebase)} 
+          deactiveUser={deactiveUser(firebase)}
+        />
       ) : (
         <CircularProgress />
       )}

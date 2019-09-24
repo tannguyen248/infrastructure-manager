@@ -40,7 +40,7 @@ const handleUserStatus = async (
   }
 };
 
-const MaterialTableDemo = ({ users, updateUser }) => {
+const MaterialTableDemo = ({ users, updateUser, deactiveUser }) => {
   const [snackbar, setSnackbar] = useState({
     open: false,
     variant: '',
@@ -92,38 +92,38 @@ const MaterialTableDemo = ({ users, updateUser }) => {
             }
           }
         ]}
-        actions={
-          [
-            // rowData => ({
-            //   icon: 'block',
-            //   tooltip: 'Deactive User',
-            //   onClick: (event, rowData) => {
-            //     handleUserStatus(
-            //       updateUser,
-            //       rowData,
-            //       state,
-            //       setState,
-            //       setSnackbar
-            //     );
-            //   },
-            //   hidden: !rowData.active
-            // }),
-            // rowData => ({
-            //   icon: 'check',
-            //   tooltip: 'Active User',
-            //   onClick: (event, rowData) => {
-            //     handleUserStatus(
-            //       updateUser,
-            //       rowData,
-            //       state,
-            //       setState,
-            //       setSnackbar
-            //     );
-            //   },
-            //   hidden: rowData.active
-            // })
-          ]
-        }
+        // actions={
+        //   [
+        //     // rowData => ({
+        //     //   icon: 'block',
+        //     //   tooltip: 'Deactive User',
+        //     //   onClick: (event, rowData) => {
+        //     //     handleUserStatus(
+        //     //       updateUser,
+        //     //       rowData,
+        //     //       state,
+        //     //       setState,
+        //     //       setSnackbar
+        //     //     );
+        //     //   },
+        //     //   hidden: !rowData.active
+        //     // }),
+        //     // rowData => ({
+        //     //   icon: 'check',
+        //     //   tooltip: 'Active User',
+        //     //   onClick: (event, rowData) => {
+        //     //     handleUserStatus(
+        //     //       updateUser,
+        //     //       rowData,
+        //     //       state,
+        //     //       setState,
+        //     //       setSnackbar
+        //     //     );
+        //     //   },
+        //     //   hidden: rowData.active
+        //     // })
+        //   ]
+        // }
         options={{
           actionsColumnIndex: -1,
           rowStyle: rowData => ({
@@ -162,6 +162,27 @@ const MaterialTableDemo = ({ users, updateUser }) => {
             //   })
           }
         }
+        actions={[{
+          icon: 'eject',
+          tooltip: 'Deactive this user',
+          onClick: (e, rowData) => new Promise((resolve, reject) => {
+            deactiveUser(rowData.email).then(result => {
+              setSnackbar({
+                open: true,
+                variant: 'success',
+                message: 'Deactive user successful'
+              });
+              resolve();
+            }).catch(err => {
+              setSnackbar({
+                open: true,
+                variant: 'error',
+                message: 'Failed to deactive user'
+              });
+              reject();
+            })
+          })
+        }]}
       />
     </>
   );
