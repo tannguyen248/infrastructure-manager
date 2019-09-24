@@ -16,11 +16,12 @@ const updateUser = firebase => async (userId, data) => {
 };
 
 const deactiveUser = firebase => async (email) => {
-  const userTeam = await firebase.firestore.collection('team').where('email', '==', email).get().then(snapshot => {
-    return snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}))[0];
+  const userTeam = await firebase.team().where('email', '==', email).get().then(snapshot => {
+    return snapshot.docs.map(doc => {
+      return {id: doc.id, ...doc.data()}});
   });
-
-  return await firebase.firestore.doc(`team/${userTeam.id}`).delete().then(() => true).catch(err => false);
+  debugger;
+  return await firebase.getTeamDetail(userTeam[0].id).delete().then(() => true).catch(err => false);
 }
 
 const Users = ({ firebase }) => {

@@ -167,12 +167,15 @@ const MaterialTableDemo = ({ users, updateUser, deactiveUser }) => {
           tooltip: 'Deactive this user',
           onClick: (e, rowData) => new Promise((resolve, reject) => {
             deactiveUser(rowData.email).then(result => {
-              setSnackbar({
-                open: true,
-                variant: 'success',
-                message: 'Deactive user successful'
-              });
-              resolve();
+              if (result) {
+
+                setSnackbar({
+                  open: true,
+                  variant: 'success',
+                  message: 'Deactive user successful'
+                });
+                resolve();
+              }
             }).catch(err => {
               setSnackbar({
                 open: true,

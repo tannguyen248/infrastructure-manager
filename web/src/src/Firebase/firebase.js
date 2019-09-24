@@ -115,7 +115,9 @@ class Firebase {
     this.db.collection(`Permission/${permissionId}`);
 
   // Team API
-  getTeamDetail = teamId => this.db.collection(`team/${teamId}`);
+  getTeamDetail = teamId => this.db.doc(`team/${teamId}`);
+
+  team = () => this.db.collection(`team`);
 
   // Device API
 
