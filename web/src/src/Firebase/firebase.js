@@ -102,6 +102,8 @@ class Firebase {
 
   transaction = () => this.db.collection('transaction');
 
+  getTransaction = (id) => this.db.doc(`transaction/${id}`);
+
   // *** Message API ***
 
   message = uid => this.db.doc(`messages/${uid}`);
@@ -113,7 +115,9 @@ class Firebase {
     this.db.collection(`Permission/${permissionId}`);
 
   // Team API
-  getTeamDetail = teamId => this.db.collection(`team/${teamId}`);
+  getTeamDetail = teamId => this.db.doc(`team/${teamId}`);
+
+  team = () => this.db.collection(`team`);
 
   // Device API
 
@@ -156,8 +160,8 @@ class Firebase {
   // History API
   getHistories = () => this.db.collection('history');
 
-  addDataToHistory = (date, deviceId, event, userId) =>
-    this.db.collection('history').set({ date, deviceId, event, userId });
+  addDataToHistory = ({date, deviceId, event, userId}) =>
+    this.db.collection('history').add({ date, deviceId, event, userId });
 }
 
 export default Firebase;

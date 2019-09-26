@@ -65,15 +65,18 @@ function MySnackbarContentWrapper(props) {
   );
 }
 
-export default props => {
+const MySnackbar = (props) => {
+  const snackbarRef = React.createRef();
+
   function handleClose(event, reason) {
     if (reason === 'clickaway') {
       return;
     }
-
-    props.setSnackbar(false);
+    console.log(snackbarRef);
+    snackbarRef.current.style.display = 'none';
   }
 
+  
   return (
     <Snackbar
       anchorOrigin={{
@@ -81,14 +84,18 @@ export default props => {
         horizontal: 'left'
       }}
       open={props.open}
-      autoHideDuration={2000}
+      autoHideDuration={6000}
       onClose={handleClose}
+      ref={snackbarRef}
     >
       <MySnackbarContentWrapper
         onClose={handleClose}
-        variant="success"
-        message="This is a success message!"
+        variant={props.variant}
+        message={props.message}
+        {...props}
       />
     </Snackbar>
   );
 };
+
+export default MySnackbar;

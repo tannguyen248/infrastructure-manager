@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import MaterialTable from 'material-table';
 import Snackbar from '../shared/Snackbar';
 import { stat } from 'fs';
+import { sortBy } from '../../helper';
 
 const handleUserStatus = async (
   updateUser,
@@ -39,7 +40,7 @@ const handleUserStatus = async (
   }
 };
 
-const MaterialTableDemo = ({ users, updateUser }) => {
+const MaterialTableDemo = ({ users, updateUser, deactiveUser }) => {
   const [snackbar, setSnackbar] = useState({
     open: false,
     variant: '',
@@ -80,7 +81,7 @@ const MaterialTableDemo = ({ users, updateUser }) => {
                     paddingLeft: 10
                   }}
                 >
-                  {rowData.histories &&
+                  {rowData.histories && sortBy(rowData.histories,  {prop: 'date'}) &&
                     rowData.histories.map((x, index) => (
                       <div key={index}>{`${x.name} ${x.imei} is ${
                         x.event
@@ -91,38 +92,38 @@ const MaterialTableDemo = ({ users, updateUser }) => {
             }
           }
         ]}
-        actions={
-          [
-            // rowData => ({
-            //   icon: 'block',
-            //   tooltip: 'Deactive User',
-            //   onClick: (event, rowData) => {
-            //     handleUserStatus(
-            //       updateUser,
-            //       rowData,
-            //       state,
-            //       setState,
-            //       setSnackbar
-            //     );
-            //   },
-            //   hidden: !rowData.active
-            // }),
-            // rowData => ({
-            //   icon: 'check',
-            //   tooltip: 'Active User',
-            //   onClick: (event, rowData) => {
-            //     handleUserStatus(
-            //       updateUser,
-            //       rowData,
-            //       state,
-            //       setState,
-            //       setSnackbar
-            //     );
-            //   },
-            //   hidden: rowData.active
-            // })
-          ]
-        }
+        // actions={
+        //   [
+        //     // rowData => ({
+        //     //   icon: 'block',
+        //     //   tooltip: 'Deactive User',
+        //     //   onClick: (event, rowData) => {
+        //     //     handleUserStatus(
+        //     //       updateUser,
+        //     //       rowData,
+        //     //       state,
+        //     //       setState,
+        //     //       setSnackbar
+        //     //     );
+        //     //   },
+        //     //   hidden: !rowData.active
+        //     // }),
+        //     // rowData => ({
+        //     //   icon: 'check',
+        //     //   tooltip: 'Active User',
+        //     //   onClick: (event, rowData) => {
+        //     //     handleUserStatus(
+        //     //       updateUser,
+        //     //       rowData,
+        //     //       state,
+        //     //       setState,
+        //     //       setSnackbar
+        //     //     );
+        //     //   },
+        //     //   hidden: rowData.active
+        //     // })
+        //   ]
+        // }
         options={{
           actionsColumnIndex: -1,
           rowStyle: rowData => ({
@@ -132,15 +133,15 @@ const MaterialTableDemo = ({ users, updateUser }) => {
         }}
         editable={
           {
-            // onRowAdd: newData =>
-            //   new Promise(resolve => {
-            //     setTimeout(() => {
-            //       resolve();
-            //       const data = [...state.data];
-            //       data.push(newData);
-            //       setState({ ...state, data });
-            //     }, 600);
-            //   }),
+            onRowAdd: newData =>
+              new Promise( (resolve, reject) => {
+                setTimeout(() => {
+                  resolve();
+                  const data = [...state.data];
+                  data.push(newData);
+                  setState({ ...state, data });
+                }, 600);
+              }),
             // onRowUpdate: (newData, oldData) =>
             //   new Promise(resolve => {
             //     setTimeout(() => {
@@ -161,6 +162,30 @@ const MaterialTableDemo = ({ users, updateUser }) => {
             //   })
           }
         }
+        actions={[{
+          icon: 'eject',
+          tooltip: 'Deactive this user',
+          onClick: (e, rowData) => new Promise((resolve, reject) => {
+            deactiveUser(rowData.email).then(result => {
+              if (result) {
+
+                setSnackbar({
+                  open: true,
+                  variant: 'success',
+                  message: 'Deactive user successful'
+                });
+                resolve();
+              }
+            }).catch(err => {
+              setSnackbar({
+                open: true,
+                variant: 'error',
+                message: 'Failed to deactive user'
+              });
+              reject();
+            })
+          })
+        }]}
       />
     </>
   );
