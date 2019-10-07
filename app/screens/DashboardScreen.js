@@ -52,7 +52,7 @@ export default class DashboardScreen extends Component {
     });
   };
 
-  _updateBorrowUser = (deviceId) => {
+  _updateBorrowUser = (deviceId, email) => {
     const userId = this.props.navigation.state.params.uid;
     const transactionCollection = this.firestoreCollection.transaction;
     const now = new Date();
@@ -68,7 +68,8 @@ export default class DashboardScreen extends Component {
           deviceId: deviceId,
           lendingDate: now,
           ownerId: userId,
-          status: "assigned"
+          status: "assigned",
+          email: email
         };
 
         transactionCollection.add(data).then(ref => {
@@ -93,7 +94,8 @@ export default class DashboardScreen extends Component {
         assignedDate: now,
         lendingDate: now,
         returnDate: now,
-        status: "assigned"
+        status: "assigned",
+        email: email
       };
 
       snapshot.forEach(doc => {
@@ -130,7 +132,7 @@ export default class DashboardScreen extends Component {
     this.setState({ isProcessing: true, isSuccess: false });
   }
 
-  _checkValidDevice = async (deviceId) => {
+  _checkValidDevice = async (deviceId, email) => {
     this.firestoreCollection.devices.doc(deviceId).get()
       .then(snapshot => {
         if (!snapshot || snapshot.empty || !snapshot.data()) {
@@ -140,7 +142,7 @@ export default class DashboardScreen extends Component {
           return;
         }
 
-        this._updateBorrowUser(deviceId);
+        this._updateBorrowUser(deviceId, email);
       });
   }
 
@@ -169,7 +171,7 @@ export default class DashboardScreen extends Component {
             return;
           }
 
-          this._checkValidDevice(deviceId);
+          this._checkValidDevice(deviceId, this.props.navigation.state.params.email);
         });
     } catch (e) {
       console.log(e);
