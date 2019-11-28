@@ -193,9 +193,11 @@ const DeviceTable = ({
                         rowData.transaction.lendingDate.toDate()}`}</div>
                     )}
                   </div>
-                  <div style={{ textAlign: 'center' }}>
-                    <QRCode value={rowData.id} />
-                  </div>
+                  ${auth && auth.username === 'admin' &&
+                    <div style={{ textAlign: 'center' }}>
+                      <QRCode value={rowData.id} />
+                    </div>
+                  }
                 </>
               );
             }
