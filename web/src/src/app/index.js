@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { withRouter } from 'react-router-dom';
 import Routes from './routes';
+import md5 from 'md5';
+const hashPassword = '21232f297a57a5a743894a0e4a801fc3';
 
 const login = setAuth => (username, password) => {
-  if (username === 'admin' && password === 'admin') {
+  if (username === 'admin' && md5(password) === hashPassword) {
     const user = { username: 'admin' };
     sessionStorage.setItem('user', JSON.stringify(user));
     setAuth(user);
