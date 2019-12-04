@@ -55,7 +55,7 @@ export default class DashboardScreen extends Component {
   _updateBorrowUser = (deviceId, email) => {
     const userId = this.props.navigation.state.params.uid;
     const transactionCollection = this.firestoreCollection.transaction;
-    const now = new Date();
+    const now = firebase.firestore.FieldValue.serverTimestamp();
 
     transactionCollection.where('deviceId', '==', deviceId).get().then(snapshot => {
       console.log('================snapshot');
