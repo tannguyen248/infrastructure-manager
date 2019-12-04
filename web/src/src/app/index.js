@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { withRouter } from 'react-router-dom';
 import Routes from './routes';
 import md5 from 'md5';
-const hashPassword = '21232f297a57a5a743894a0e4a801fc3';
+const hashPassword = '76ece423561f9629f62901c9c52d3623';
 
 const login = setAuth => (username, password) => {
   if (username === 'admin' && md5(password) === hashPassword) {

@@ -1,0 +1,10 @@
+username: admin
+password: KbbAdmin@kms2019!
+
+Debug
+host.exp.exponent
+0A:24:16:FE:55:B9:28:41:FE:9C:5A:86:9F:45:CE:19:8E:FB:B9:E6
+
+Production
+08:F9:38:6B:6E:27:59:B5:20:AB:3E:2D:93:D0:6B:8C:4C:97:81:39
+com.device.management
