@@ -53,9 +53,9 @@ const DeviceTable = ({
     variant: '',
     message: ''
   });
-  const [state, setState] = React.useState({
-    columns: [
-      { title: 'Id', field: 'id', editable: 'never' },
+
+  const customColumns =  [
+     auth && auth.username === 'admin' ? { title: 'Id', field: 'id', editable: 'never' } : {},
       { title: 'Name', field: 'name' },
       { title: 'imeiNumber', field: 'imeiNumber' },
       {
@@ -86,7 +86,10 @@ const DeviceTable = ({
           );
         }
       }
-    ],
+    ];
+
+  const [state, setState] = React.useState({
+    columns: customColumns,
     data: [...devices]
   });
 
