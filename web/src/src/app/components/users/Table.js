@@ -40,7 +40,7 @@ const handleUserStatus = async (
   }
 };
 
-const MaterialTableDemo = ({ users, updateUser, deactiveUser }) => {
+const MaterialTableDemo = ({ users, updateUser, deactiveUser, activateUser }) => {
   const [snackbar, setSnackbar] = useState({
     open: false,
     variant: '',
@@ -162,30 +162,58 @@ const MaterialTableDemo = ({ users, updateUser, deactiveUser }) => {
             //   })
           }
         }
-        actions={[{
-          icon: 'eject',
-          tooltip: 'Deactive this user',
-          onClick: (e, rowData) => new Promise((resolve, reject) => {
-            deactiveUser(rowData.email).then(result => {
-              if (result) {
+        actions={[
+          {
+            icon: 'eject',
+            tooltip: 'Deactive this user',
+            onClick: (e, rowData) => new Promise((resolve, reject) => {
+              deactiveUser(rowData.email).then(result => {
+                if (result) {
 
+                  setSnackbar({
+                    open: true,
+                    variant: 'success',
+                    message: 'deactive user successful'
+                  });
+                  resolve();
+                }
+              }).catch(err => {
                 setSnackbar({
                   open: true,
-                  variant: 'success',
-                  message: 'Deactive user successful'
+                  variant: 'error',
+                  message: 'Failed to deactive user'
                 });
-                resolve();
+                reject();
+              })
+            })
+        },
+        {
+          icon: 'done',
+          tooltip: 'Activate this user',
+          onClick: (e, rowData) => new Promise((resolve, reject) => {
+            activateUser(rowData.email).then(result => {
+              if (result) {
+                console.log('Result', result);
+                setSnackbar({
+                    open: true,
+                    variant: 'success',
+                    message: 'Activate user successful'
+                  });
+                  resolve();
+
               }
             }).catch(err => {
-              setSnackbar({
-                open: true,
-                variant: 'error',
-                message: 'Failed to deactive user'
-              });
-              reject();
+                console.log('Error',err);
+                setSnackbar({
+                  open: true,
+                  variant: 'error',
+                  message: 'Failed to activate user'
+                });
+
             })
           })
-        }]}
+        }
+      ]}
       />
     </>
   );

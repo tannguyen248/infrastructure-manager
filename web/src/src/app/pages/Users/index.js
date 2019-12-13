@@ -20,8 +20,17 @@ const deactiveUser = firebase => async (email) => {
     return snapshot.docs.map(doc => {
       return {id: doc.id, ...doc.data()}});
   });
-  debugger;
   return await firebase.getTeamDetail(userTeam[0].id).delete().then(() => true).catch(err => false);
+}
+
+const activateUser = firebase => async (email) => {
+  console.log('user team email',email);
+  const addedUser = await firebase.team().add({
+    email
+  }).then(() => true).catch(error => {
+    return false;
+  });
+
 }
 
 const Users = ({ firebase }) => {
@@ -109,10 +118,11 @@ const Users = ({ firebase }) => {
   return (
     <>
       {usersState ? (
-        <Table 
-          users={usersState} 
-          updateUser={updateUser(firebase)} 
+        <Table
+          users={usersState}
+          updateUser={updateUser(firebase)}
           deactiveUser={deactiveUser(firebase)}
+          activateUser={activateUser(firebase)}
         />
       ) : (
         <CircularProgress />
