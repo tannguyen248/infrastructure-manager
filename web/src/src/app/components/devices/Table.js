@@ -215,29 +215,39 @@ const DeviceTable = ({
           icon: 'cached',
           tooltip: 'Revoke this device',
           onClick: (e, rowData) => new Promise((resolve, reject) => {
-            if (rowData.transaction.status === '') {
+            if (rowData.transaction && rowData.transaction.status === '') {
               setSnackbar({
                 open: true,
                 message: 'Device is available. No need to revoke',
                 variant: 'error'
               });
             } else {
-
-              revokeDevice(rowData.id, rowData.transaction.id).then(result => {
+                debugger;
+                if (rowData.id && rowData.transaction && rowData.transaction.id) {
+                  debugger;
+                  revokeDevice(rowData.id, rowData.transaction.id).then(result => {
+                      setSnackbar({
+                        open: true,
+                        message: 'Revoke device successfully!',
+                        variant: 'success'
+                      });
+                      resolve();
+                  }).catch(err => {
+                    setSnackbar({
+                      open: true,
+                      message: 'Failed to revoke device!',
+                      variant: 'error'
+                    });
+                    reject();
+                  })
+                } else {
                   setSnackbar({
                     open: true,
-                    message: 'Revoke device successfully!',
-                    variant: 'success'
+                    message: 'Failed to revoke device!',
+                    variant: 'error'
                   });
-                  resolve();
-              }).catch(err => {
-                setSnackbar({
-                  open: true,
-                  message: 'Failed to revoke device!',
-                  variant: 'error'
-                });
-                reject();
-              })
+                  reject();
+                }
             }
           }),
           disabled: !auth
