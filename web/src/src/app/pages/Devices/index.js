@@ -78,7 +78,6 @@ const revokeDevice = firebase => async (deviceId, transactionId) => {
 const Devices = ({ firebase, auth }) => {
   const [devicesState, setDevices] = useState(null);
   const [transactionsState, setTransactions] = useState(null);
-  // const [usersState, setUsers] = useState(null);
 
   useEffect(() => {
     const unsubcribe = firebase.transaction().onSnapshot(snapshot => {
@@ -100,23 +99,6 @@ const Devices = ({ firebase, auth }) => {
       unsubcribe && unsubcribe();
     };
   }, []);
-
-  // useEffect(() => {
-  //   const unsubcribe = firebase.db
-  //     .collection('users')
-  //     .onSnapshot(querySnapshot => {
-  //       var users = [];
-  //       querySnapshot.forEach(function(doc) {
-  //         users.push({ id: doc.id, ...doc.data() });
-  //       });
-
-  //       setUsers(users);
-  //     });
-
-  //   return () => {
-  //     unsubcribe && unsubcribe();
-  //   };
-  // });
 
   useEffect(() => {
     const unsubscribe = firebase.devices().onSnapshot(snapshot => {
@@ -151,6 +133,7 @@ const Devices = ({ firebase, auth }) => {
   return (
     <>
       {devicesState ? (
+        <>
         <Table
           devices={devicesState}
           updateDevice={updateDevice(firebase)}
@@ -159,11 +142,14 @@ const Devices = ({ firebase, auth }) => {
           revokeDevice={revokeDevice(firebase)}
           auth={auth}
         />
+        </>
       ) : (
         <CircularProgress />
-      )}
+      )
+      }
     </>
   );
 };
+
 
 export default withFirebase(Devices);
