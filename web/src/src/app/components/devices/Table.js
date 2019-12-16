@@ -335,7 +335,7 @@ const DeviceTable =
           ]}
         />
 
-        <ImportDevice
+        {auth && auth.username === 'admin' ? <ImportDevice
           importDevices={importDevices}
           selectedSheet={selectedSheet}
           devices={devices}
@@ -343,7 +343,7 @@ const DeviceTable =
           handleSelect={handleSelect}
           sheets={sheets}
           handleClick={handleClick}
-        />
+        /> : null}
       </>
     );
   };
