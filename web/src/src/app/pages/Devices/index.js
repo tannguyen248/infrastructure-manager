@@ -138,7 +138,7 @@ const Devices = ({ firebase, auth }) => {
     return () => {
       unsubscribe && unsubscribe();
     };
-  }, [transactionsState]);
+  }, []);
 
   return (
     <>

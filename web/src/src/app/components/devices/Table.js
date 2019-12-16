@@ -57,7 +57,7 @@ const handleDeviceStatus = async (
   }
 };
 
-const DeviceTable = React.memo(
+const DeviceTable =
   ({ devices, updateDevice, addDevice, removeDevice, revokeDevice, auth }) => {
     const [snackbar, setSnackbar] = useState({
       open: false,
@@ -105,6 +105,62 @@ const DeviceTable = React.memo(
       columns: customColumns,
       data: [...devices]
     });
+
+    const [sheets, setSheets] = useState([]);
+    const [selectedSheet, setSelectedSheet] = useState(null);
+    const [workbook, setWorkbook] = useState(null);
+
+  const handleClick = e => {
+    if (workbook && workbook.Sheets) {
+      const selectedSheetForImporting = XLSX.utils.sheet_to_json(
+        workbook.Sheets[selectedSheet],
+        { raw: true }
+      );
+      const parsedData = getParseData(selectedSheetForImporting);
+
+      const allDeviceImeiNumber = devices.map(device => device.imeiNumber);
+
+      let newlyAddDevices = [];
+
+      if (allDeviceImeiNumber && allDeviceImeiNumber.length === 0) {
+        newlyAddDevices = parsedData;
+      } else {
+        newlyAddDevices = parsedData.filter(res => {
+          return allDeviceImeiNumber.indexOf(res.imeiNumber) === -1;
+        });
+      }
+
+      newlyAddDevices.forEach(res => {
+        addDevice({
+          name: res.name,
+          imeiNumber: res.imeiNumber,
+          model: res.model
+        });
+      });
+    }
+  };
+
+  const handleSelect = useCallback(e => {
+    setSelectedSheet(e.target.value);
+  }, []);
+
+  const handleFileChosen = e => {
+    const data = new Uint8Array(e.target.result);
+    const importedExcel = XLSX.read(data, { type: 'array' });
+
+    setSheets(importedExcel.Sheets);
+    setWorkbook(importedExcel);
+  }
+
+  const importDevices = useCallback(
+    e => {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onloadend = handleFileChosen;
+      reader.readAsArrayBuffer(file);
+    },
+    [addDevice, devices]
+  );
 
     const editable = () => {
       if (auth && auth.username === 'admin') {
@@ -279,11 +335,18 @@ const DeviceTable = React.memo(
           ]}
         />
 
-        <ImportDevice devices={devices} addDevice={addDevice} />
+        <ImportDevice
+          importDevices={importDevices}
+          selectedSheet={selectedSheet}
+          devices={devices}
+          addDevice={addDevice}
+          handleSelect={handleSelect}
+          sheets={sheets}
+          handleClick={handleClick}
+        />
       </>
     );
-  }
-);
+  };
 
 const getParseData = selectedSheetForImporting => {
   if (selectedSheetForImporting) {
@@ -298,66 +361,7 @@ const getParseData = selectedSheetForImporting => {
   return mockData;
 };
 
-const ImportDevice = React.memo(({ devices, addDevice, ...props }) => {
-  const [sheets, setSheets] = useState([]);
-  const [selectedSheet, setSelectedSheet] = useState(null);
-  const [workbook, setWorkbook] = useState(null);
-
-  const handleClick = useCallback(
-    e => {
-      if (workbook && workbook.Sheets) {
-        const selectedSheetForImporting = XLSX.utils.sheet_to_json(
-          workbook.Sheets[selectedSheet],
-          { raw: true }
-        );
-        console.log('btn click', selectedSheetForImporting);
-        const parsedData = getParseData(selectedSheetForImporting);
-
-        const allDeviceImeiNumber = devices.map(device => device.imeiNumber);
-
-        const newlyAddDevices = parsedData.filter(res => {
-          return allDeviceImeiNumber.indexOf(res.imeiNumber) === -1;
-        });
-
-        newlyAddDevices.forEach(res => {
-          addDevice({
-            name: res.name,
-            imeiNumber: res.imeiNumber,
-            model: res.model
-          });
-        });
-      }
-    },
-    [selectedSheet, workbook]
-  );
-
-  const handleSelect = useCallback(e => {
-    setSelectedSheet(e.target.value);
-  }, []);
-
-  const importDevices = useCallback(
-    e => {
-      const file = e.target.files[0];
-      const reader = new FileReader();
-
-      reader.onload = e => {
-        const data = new Uint8Array(e.target.result);
-        const importedExcel = XLSX.read(data, { type: 'array' });
-
-        const sheets = Object.keys(importedExcel.Sheets).map(sheetName => {
-          return XLSX.utils.sheet_to_json(importedExcel.Sheets[sheetName], {
-            raw: true
-          });
-        });
-
-        setSheets(importedExcel.Sheets);
-        setWorkbook(importedExcel);
-      };
-      reader.readAsArrayBuffer(file);
-    },
-    [addDevice, devices]
-  );
-
+const ImportDevice = ({ devices, addDevice,importDevices, selectedSheet, handleSelect, sheets,handleClick, ...props }) => {
   return (
     <div style={{ display: 'flex', marginTop: '24px' }}>
       <span>
@@ -393,6 +397,6 @@ const ImportDevice = React.memo(({ devices, addDevice, ...props }) => {
       </span>
     </div>
   );
-});
+};
 
 export default DeviceTable;
