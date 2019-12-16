@@ -1,26 +1,26 @@
-import Input from "@material-ui/core/Input";
-import BlockIcon from "@material-ui/icons/Block";
-import CheckCircleIcon from "@material-ui/icons/CheckCircle";
-import MaterialTable from "material-table";
-import QRCode from "qrcode-react";
-import React, { useState, useCallback } from "react";
-import XLSX from "xlsx";
-import Snackbar from "../shared/Snackbar";
-import { Button } from "@material-ui/core";
-import InputLabel from "@material-ui/core/InputLabel";
-import MenuItem from "@material-ui/core/MenuItem";
-import Select from "@material-ui/core/Select";
+import Input from '@material-ui/core/Input';
+import BlockIcon from '@material-ui/icons/Block';
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import MaterialTable from 'material-table';
+import QRCode from 'qrcode-react';
+import React, { useState, useCallback } from 'react';
+import XLSX from 'xlsx';
+import Snackbar from '../shared/Snackbar';
+import { Button } from '@material-ui/core';
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import Select from '@material-ui/core/Select';
 
 const mockData = [
   {
-    name: "iphone 7",
-    imeiNumber: "1234567",
-    model: "xs max"
+    name: 'iphone 7',
+    imeiNumber: '1234567',
+    model: 'xs max'
   },
   {
-    name: "iphone 8",
-    imeiNumber: "123458",
-    model: "xs max"
+    name: 'iphone 8',
+    imeiNumber: '123458',
+    model: 'xs max'
   }
 ];
 
@@ -45,254 +45,254 @@ const handleDeviceStatus = async (
     setDataState({ ...state, data });
     setSnackbar({
       open: true,
-      message: "Update successfully!",
-      variant: "success"
+      message: 'Update successfully!',
+      variant: 'success'
     });
   } else {
     setSnackbar({
       open: true,
-      message: "Fail!",
-      variant: "error"
+      message: 'Fail!',
+      variant: 'error'
     });
   }
 };
 
-const DeviceTable = React.memo(({
-  devices,
-  updateDevice,
-  addDevice,
-  removeDevice,
-  revokeDevice,
-  auth
-}) => {
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    variant: "",
-    message: ""
-  });
+const DeviceTable = React.memo(
+  ({ devices, updateDevice, addDevice, removeDevice, revokeDevice, auth }) => {
+    const [snackbar, setSnackbar] = useState({
+      open: false,
+      variant: '',
+      message: ''
+    });
 
-  const customColumns = [
-    auth && auth.username === "admin"
-      ? { title: "Id", field: "id", editable: "never" }
-      : {},
-    { title: "Name", field: "name" },
-    { title: "imeiNumber", field: "imeiNumber" },
-    {
-      title: "Model",
-      field: "model"
-    },
-    {
-      field: "available",
-      title: "Available",
-      editable: "never",
-      customSort: (rowData1, rowData2) => {
-        var isLent1 =
-          rowData1.transaction && rowData1.transaction.status === 'assigned';
-        var isLent2 =
-          rowData2.transaction && rowData2.transaction.status === "assigned";
-
-        return isLent1 === isLent2 ? 0 : isLent1 ? 1 : -1;
+    const customColumns = [
+      auth && auth.username === 'admin'
+        ? { title: 'Id', field: 'id', editable: 'never' }
+        : {},
+      { title: 'Name', field: 'name' },
+      { title: 'imeiNumber', field: 'imeiNumber' },
+      {
+        title: 'Model',
+        field: 'model'
       },
-      render: rowData => {
-        var isLent =
-          rowData &&
-          rowData.transaction &&
-          rowData.transaction.status === "assigned";
-        return isLent ? (
-          <BlockIcon color="error" />
-        ) : (
-          <CheckCircleIcon color="primary" />
-        );
+      {
+        field: 'available',
+        title: 'Available',
+        editable: 'never',
+        customSort: (rowData1, rowData2) => {
+          var isLent1 =
+            rowData1.transaction && rowData1.transaction.status === 'assigned';
+          var isLent2 =
+            rowData2.transaction && rowData2.transaction.status === 'assigned';
+
+          return isLent1 === isLent2 ? 0 : isLent1 ? 1 : -1;
+        },
+        render: rowData => {
+          var isLent =
+            rowData &&
+            rowData.transaction &&
+            rowData.transaction.status === 'assigned';
+          return isLent ? (
+            <BlockIcon color='error' />
+          ) : (
+            <CheckCircleIcon color='primary' />
+          );
+        }
       }
-    }
-  ];
+    ];
 
-  const [state, setState] = React.useState({
-    columns: customColumns,
-    data: [...devices]
-  });
+    const [state, setState] = React.useState({
+      columns: customColumns,
+      data: [...devices]
+    });
 
-  const editable = () => {
-    if (auth && auth.username === "admin") {
-      return {
-        onRowAdd: newData =>
-          new Promise((resolve, reject) => {
-            addDevice({
-              name: newData.name,
-              imeiNumber: newData.imeiNumber,
-              model: newData.model
-            }).then(result => {
-              if (result) {
-                const data = [...state.data, { ...resolve, transactions: [] }];
-                setState({ ...state, data });
-                setSnackbar({
-                  open: true,
-                  message: "Add successfully!",
-                  variant: "success"
-                });
-
-                resolve();
-              } else {
-                setSnackbar({
-                  open: true,
-                  message: "Fail!",
-                  variant: "error"
-                });
-
-                reject();
-              }
-            });
-          }),
-        onRowUpdate: (newData, oldData) =>
-          new Promise(resolve => {
-            setTimeout(() => {
-              resolve();
-              handleDeviceStatus(
-                updateDevice,
-                oldData,
-                newData,
-                state,
-                setState,
-                setSnackbar
-              );
-            }, 600);
-          }),
-        onRowDelete: oldData =>
-          new Promise((resolve, reject) => {
-            removeDevice(oldData.id).then(result => {
-              if (result === true) {
-                const data = [...state.data];
-                data.splice(data.indexOf(oldData), 1);
-                setState({ ...state, data });
-                setSnackbar({
-                  open: true,
-                  message: "Remove successfully!",
-                  variant: "success"
-                });
-
-                resolve();
-              } else {
-                setSnackbar({
-                  open: true,
-                  message: "Fail!",
-                  variant: "error"
-                });
-
-                reject();
-              }
-            });
-          })
-      };
-    } else {
-      return {};
-    }
-  };
-
-  return (
-    <>
-      <Snackbar {...snackbar} />
-      <MaterialTable
-        title="Devices"
-        columns={state.columns}
-        // data={state.data}
-        data={devices}
-        detailPanel={[
-          {
-            tooltip: "Historoies",
-            render: rowData => {
-              return (
-                <>
-                  <div
-                    style={{
-                      fontSize: 14,
-                      paddingLeft: 10
-                    }}
-                  >
-                    {rowData.transaction && (
-                      <div>{`${rowData.transaction.email &&
-                        rowData.transaction.email} lent on ${rowData.transaction
-                        .lendingDate &&
-                        rowData.transaction.lendingDate.toDate()}`}</div>
-                    )}
-                  </div>
-                  {auth && auth.username === "admin" && (
-                    <div style={{ textAlign: "center" }}>
-                      <QRCode value={rowData.id} />
-                    </div>
-                  )}
-                </>
-              );
-            }
-          }
-        ]}
-        options={{
-          actionsColumnIndex: -1,
-          sorting: true
-        }}
-        editable={editable()}
-        actions={[
-          {
-            icon: "cached",
-            tooltip: "Revoke this device",
-            onClick: (e, rowData) =>
-              new Promise((resolve, reject) => {
-                if (rowData.transaction && rowData.transaction.status === "") {
+    const editable = () => {
+      if (auth && auth.username === 'admin') {
+        return {
+          onRowAdd: newData =>
+            new Promise((resolve, reject) => {
+              addDevice({
+                name: newData.name,
+                imeiNumber: newData.imeiNumber,
+                model: newData.model
+              }).then(result => {
+                if (result) {
+                  const data = [
+                    ...state.data,
+                    { ...resolve, transactions: [] }
+                  ];
+                  setState({ ...state, data });
                   setSnackbar({
                     open: true,
-                    message: "Device is available. No need to revoke",
-                    variant: "error"
+                    message: 'Add successfully!',
+                    variant: 'success'
                   });
+
+                  resolve();
                 } else {
+                  setSnackbar({
+                    open: true,
+                    message: 'Fail!',
+                    variant: 'error'
+                  });
+
+                  reject();
+                }
+              });
+            }),
+          onRowUpdate: (newData, oldData) =>
+            new Promise(resolve => {
+              setTimeout(() => {
+                resolve();
+                handleDeviceStatus(
+                  updateDevice,
+                  oldData,
+                  newData,
+                  state,
+                  setState,
+                  setSnackbar
+                );
+              }, 600);
+            }),
+          onRowDelete: oldData =>
+            new Promise((resolve, reject) => {
+              removeDevice(oldData.id).then(result => {
+                if (result === true) {
+                  const data = [...state.data];
+                  data.splice(data.indexOf(oldData), 1);
+                  setState({ ...state, data });
+                  setSnackbar({
+                    open: true,
+                    message: 'Remove successfully!',
+                    variant: 'success'
+                  });
+
+                  resolve();
+                } else {
+                  setSnackbar({
+                    open: true,
+                    message: 'Fail!',
+                    variant: 'error'
+                  });
+
+                  reject();
+                }
+              });
+            })
+        };
+      } else {
+        return {};
+      }
+    };
+
+    return (
+      <>
+        <Snackbar {...snackbar} />
+        <MaterialTable
+          title='Devices'
+          columns={state.columns}
+          data={devices}
+          detailPanel={[
+            {
+              tooltip: 'Historoies',
+              render: rowData => {
+                return (
+                  <>
+                    <div
+                      style={{
+                        fontSize: 14,
+                        paddingLeft: 10
+                      }}
+                    >
+                      {rowData.transaction && (
+                        <div>{`${rowData.transaction.email &&
+                          rowData.transaction.email} lent on ${rowData
+                          .transaction.lendingDate &&
+                          rowData.transaction.lendingDate.toDate()}`}</div>
+                      )}
+                    </div>
+                    {auth && auth.username === 'admin' && (
+                      <div style={{ textAlign: 'center' }}>
+                        <QRCode value={rowData.id} />
+                      </div>
+                    )}
+                  </>
+                );
+              }
+            }
+          ]}
+          options={{
+            actionsColumnIndex: -1,
+            sorting: true
+          }}
+          editable={editable()}
+          actions={[
+            {
+              icon: 'cached',
+              tooltip: 'Revoke this device',
+              onClick: (e, rowData) =>
+                new Promise((resolve, reject) => {
                   if (
-                    rowData.id &&
                     rowData.transaction &&
-                    rowData.transaction.id
+                    rowData.transaction.status === ''
                   ) {
-                    revokeDevice(rowData.id, rowData.transaction.id)
-                      .then(result => {
-                        setSnackbar({
-                          open: true,
-                          message: "Revoke device successfully!",
-                          variant: "success"
-                        });
-                        resolve();
-                      })
-                      .catch(err => {
-                        setSnackbar({
-                          open: true,
-                          message: "Failed to revoke device!",
-                          variant: "error"
-                        });
-                        reject();
-                      });
-                  } else {
                     setSnackbar({
                       open: true,
-                      message: "Failed to revoke device!",
-                      variant: "error"
+                      message: 'Device is available. No need to revoke',
+                      variant: 'error'
                     });
-                    reject();
+                  } else {
+                    if (
+                      rowData.id &&
+                      rowData.transaction &&
+                      rowData.transaction.id
+                    ) {
+                      revokeDevice(rowData.id, rowData.transaction.id)
+                        .then(result => {
+                          setSnackbar({
+                            open: true,
+                            message: 'Revoke device successfully!',
+                            variant: 'success'
+                          });
+                          resolve();
+                        })
+                        .catch(err => {
+                          setSnackbar({
+                            open: true,
+                            message: 'Failed to revoke device!',
+                            variant: 'error'
+                          });
+                          reject();
+                        });
+                    } else {
+                      setSnackbar({
+                        open: true,
+                        message: 'Failed to revoke device!',
+                        variant: 'error'
+                      });
+                      reject();
+                    }
                   }
-                }
-              }),
-            disabled: !auth
-          }
-        ]}
-      />
+                }),
+              disabled: !auth
+            }
+          ]}
+        />
 
-      <ImportDevice devices={devices} addDevice={addDevice} />
-    </>
-  );
-});
+        <ImportDevice devices={devices} addDevice={addDevice} />
+      </>
+    );
+  }
+);
 
-const getParseData = (selectedSheetForImporting) => {
+const getParseData = selectedSheetForImporting => {
   if (selectedSheetForImporting) {
     return selectedSheetForImporting.map(device => {
       return {
         name: device.Devices || '',
         model: device['Android/iOS'] || '',
         imeiNumber: device['Serial Number/IMEI'] || ''
-      }
+      };
     });
   }
   return mockData;
@@ -303,84 +303,73 @@ const ImportDevice = React.memo(({ devices, addDevice, ...props }) => {
   const [selectedSheet, setSelectedSheet] = useState(null);
   const [workbook, setWorkbook] = useState(null);
 
-  const handleClick = useCallback(e => {
-    if (workbook && workbook.Sheets) {
-      const selectedSheetForImporting = XLSX.utils.sheet_to_json(
-        workbook.Sheets[selectedSheet],
-        { raw: true }
-      );
-      console.log("btn click", selectedSheetForImporting);
-      const parsedData = getParseData(selectedSheetForImporting);
+  const handleClick = useCallback(
+    e => {
+      if (workbook && workbook.Sheets) {
+        const selectedSheetForImporting = XLSX.utils.sheet_to_json(
+          workbook.Sheets[selectedSheet],
+          { raw: true }
+        );
+        console.log('btn click', selectedSheetForImporting);
+        const parsedData = getParseData(selectedSheetForImporting);
 
-      const allDeviceImeiNumber = devices.map(device => device.imeiNumber);
+        const allDeviceImeiNumber = devices.map(device => device.imeiNumber);
 
-      const newlyAddDevices = parsedData.filter(res => {
-        return allDeviceImeiNumber.indexOf(res.imeiNumber) === -1;
-      });
-
-      newlyAddDevices.forEach(res => {
-        addDevice({
-          name: res.name,
-          imeiNumber: res.imeiNumber,
-          model: res.model
+        const newlyAddDevices = parsedData.filter(res => {
+          return allDeviceImeiNumber.indexOf(res.imeiNumber) === -1;
         });
-      });
 
-    }
-  }, [selectedSheet, workbook]);
+        newlyAddDevices.forEach(res => {
+          addDevice({
+            name: res.name,
+            imeiNumber: res.imeiNumber,
+            model: res.model
+          });
+        });
+      }
+    },
+    [selectedSheet, workbook]
+  );
 
   const handleSelect = useCallback(e => {
     setSelectedSheet(e.target.value);
   }, []);
 
-  const importDevices = useCallback(e => {
-    const file = e.target.files[0];
-    const reader = new FileReader();
+  const importDevices = useCallback(
+    e => {
+      const file = e.target.files[0];
+      const reader = new FileReader();
 
-    reader.onload = e => {
-      const data = new Uint8Array(e.target.result);
-      const importedExcel = XLSX.read(data, { type: "array" });
+      reader.onload = e => {
+        const data = new Uint8Array(e.target.result);
+        const importedExcel = XLSX.read(data, { type: 'array' });
 
-
-
-      const sheets = Object.keys(importedExcel.Sheets).map(sheetName => {
-        return XLSX.utils.sheet_to_json(importedExcel.Sheets[sheetName], {
-          raw: true
+        const sheets = Object.keys(importedExcel.Sheets).map(sheetName => {
+          return XLSX.utils.sheet_to_json(importedExcel.Sheets[sheetName], {
+            raw: true
+          });
         });
-      });
 
-      // const allDeviceImeiNumber = devices.map(device => device.imeiNumber);
-
-      // const newlyAddDevices = parsedData.filter(res => {
-      //   return allDeviceImeiNumber.indexOf(res.imeiNumber) === -1;
-      // });
-
-      // newlyAddDevices.forEach(res => {
-      //   addDevice({
-      //     name: res.name,
-      //     imeiNumber: res.imeiNumber,
-      //     model: res.model
-      //   });
-      // });
-
-      setSheets(importedExcel.Sheets);
-      setWorkbook(importedExcel);
-    };
-    reader.readAsArrayBuffer(file);
-  }, [addDevice, devices]);
+        setSheets(importedExcel.Sheets);
+        setWorkbook(importedExcel);
+      };
+      reader.readAsArrayBuffer(file);
+    },
+    [addDevice, devices]
+  );
 
   return (
-    <div style={{ display: "flex", marginTop: "24px" }}>
+    <div style={{ display: 'flex', marginTop: '24px' }}>
       <span>
-        <Input color="secondary" type="file" onChange={importDevices} />
+        <Input color='secondary' type='file' onChange={importDevices} />
       </span>
-      <span style={{ marginLeft: "24px" }}>
-        <InputLabel id="demo-simple-select-label">
+      <span style={{ marginLeft: '24px' }}>
+        <InputLabel id='demo-simple-select-label'>
           Select sheet to import
         </InputLabel>
         <Select
-          id="demo-simple-select"
-          value={selectedSheet || ""}
+          id='demo-simple-select'
+          value={selectedSheet || ''}
           onChange={handleSelect}
         >
           {Object.keys(sheets).map((key, index) => {
@@ -394,10 +383,10 @@ const ImportDevice = React.memo(({ devices, addDevice, ...props }) => {
       </span>
       <span>
         <Button
-          variant="outlined"
-          color="primary"
+          variant='outlined'
+          color='primary'
           onClick={handleClick}
-          style={{ marginLeft: "10px" }}
+          style={{ marginLeft: '10px' }}
         >
           Import devices
         </Button>
