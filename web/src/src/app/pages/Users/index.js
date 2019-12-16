@@ -30,7 +30,6 @@ const activateUser = firebase => async (email) => {
   }).then(() => true).catch(error => {
     return false;
   });
-
 }
 
 const Users = ({ firebase }) => {
