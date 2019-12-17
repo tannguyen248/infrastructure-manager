@@ -91,16 +91,10 @@ const Devices = ({ firebase, auth }) => {
 
   useEffect(() => {
     const unsubcribe = firebase.transaction().onSnapshot(snapshot => {
-      const transactions = [];
-
-      snapshot.forEach(doc => {
-        if (doc) {
-          transactions.push({
-            id: doc.id,
-            ...doc.data()
-          });
-        }
-      });
+      const transactions = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
 
       setTransactions(transactions);
     });
@@ -138,7 +132,7 @@ const Devices = ({ firebase, auth }) => {
     return () => {
       unsubscribe && unsubscribe();
     };
-  }, []);
+  }, [transactionsState]);
 
   return (
     <>
