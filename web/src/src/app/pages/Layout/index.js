@@ -11,6 +11,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import DevicesOtherIcon from '@material-ui/icons/DevicesOther';
+import History from '@material-ui/icons/History';
 import MenuIcon from '@material-ui/icons/Menu';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
@@ -71,7 +72,7 @@ function Page(props) {
     <div>
       <div className={classes.logo}>
         {' '}
-        <Typography variant="h3" component="h3" component={Link} to="/">
+        <Typography variant='h3' component='h3' component={Link} to='/'>
           DM
         </Typography>
       </div>
@@ -82,7 +83,7 @@ function Page(props) {
             button
             key={'SupervisorAccount'}
             component={Link}
-            to="/users"
+            to='/users'
           >
             <ListItemIcon>
               <SupervisorAccountIcon />
@@ -90,11 +91,17 @@ function Page(props) {
             <ListItemText primary={'User Manager'} />
           </ListItem>
         )}
-        <ListItem button key={'DevicesOther'} component={Link} to="/devices">
+        <ListItem button key={'DevicesOther'} component={Link} to='/devices'>
           <ListItemIcon>
             <DevicesOtherIcon />
           </ListItemIcon>
           <ListItemText primary={'Device Manager'} />
+        </ListItem>
+        <ListItem button key={'Histories'} component={Link} to='/histories'>
+          <ListItemIcon>
+            <History />
+          </ListItemIcon>
+          <ListItemText primary={'Histories'} />
         </ListItem>
       </List>
     </div>
