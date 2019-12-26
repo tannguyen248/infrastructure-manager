@@ -173,6 +173,7 @@ class Firebase {
   // History API
   getHistories = () => this.db.collection('history');
 
+  histories = () => this.db.collection('history');
   addDataToHistory = ({ date, deviceId, event, userId }) =>
     this.db.collection('history').add({ date, deviceId, event, userId });
 }
