@@ -1,6 +1,15 @@
-import React from 'react';
-import { Route, Switch, Redirect } from 'react-router-dom';
-import { Users, Login, ErrorPage, Devices, Page } from '../pages';
+import React, { useContext } from 'react';
+import { Redirect, Route, Switch } from 'react-router-dom';
+import AuthContext from '../context/AuthContext';
+import {
+  Devices,
+  ErrorPage,
+  Histories,
+  Login,
+  Page,
+  UserHistoriesList,
+  Users
+} from '../pages';
 
 const LoginRoute = ({
   auth,
@@ -10,7 +19,6 @@ const LoginRoute = ({
   history,
   ...rest
 }) => {
-  console.log('auth', auth);
   return (
     <Route
       {...rest}
@@ -58,40 +66,58 @@ const PublicRoute = ({ auth, pagename, component: Component, ...rest }) => {
       {...rest}
       render={() => (
         <Page pagename={pagename} auth={auth}>
-          <Component auth={auth} />
+          <Component auth={auth} {...rest} />
         </Page>
       )}
     />
   );
 };
 
-const Routes = ({ auth, ...rest }) => (
-  <Switch>
-    <PrivateRoute
-      exact
-      path="/"
-      auth={auth}
-      pagename="User Manager"
-      component={Users}
-      {...rest}
-    />
-    <LoginRoute path="/login" auth={auth} pagename="Login" {...rest} />
-    <PrivateRoute
-      path="/users"
-      auth={auth}
-      pagename="User Manager"
-      component={Users}
-      {...rest}
-    />
-    <PublicRoute
-      path="/devices"
-      auth={auth}
-      pagename="Device Manager"
-      component={Devices}
-      {...rest}
-    />
-    <PublicRoute component={ErrorPage} />
-  </Switch>
-);
+const Routes = ({ auth, ...rest }) => {
+  
+  return (
+    <Switch>
+      <PrivateRoute
+        auth={auth}
+        exact
+        path='/'
+        pagename='User Manager'
+        component={Users}
+        {...rest}
+      />
+      <LoginRoute path='/login' auth={auth} pagename='Login' {...rest} />
+      <PrivateRoute
+        auth={auth}
+        path='/users'
+        pagename='User Manager'
+        component={Users}
+        {...rest}
+      />
+      <PublicRoute
+        auth={auth}
+        path='/devices'
+        pagename='Device Manager'
+        component={Devices}
+        {...rest}
+      />
+      <PublicRoute
+        auth={auth}
+        path='/histories/:deviceId'
+        pagename='User Histories'
+        component={UserHistoriesList}
+        {...rest}
+      />
+      <PublicRoute
+        auth={auth}
+        path='/histories'
+        pagename='Histories'
+        component={Histories}
+        {...rest}
+      />
+
+      <PublicRoute component={ErrorPage} />
+    </Switch>
+  );
+};
 
 export default Routes;

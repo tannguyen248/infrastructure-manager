@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import ErrorIcon from '@material-ui/icons/Error';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import Snackbar from '@material-ui/core/Snackbar';
@@ -66,17 +66,6 @@ function MySnackbarContentWrapper(props) {
 }
 
 const MySnackbar = (props) => {
-  const snackbarRef = React.createRef();
-
-  function handleClose(event, reason) {
-    if (reason === 'clickaway') {
-      return;
-    }
-    console.log(snackbarRef);
-    snackbarRef.current.style.display = 'none';
-  }
-
-  
   return (
     <Snackbar
       anchorOrigin={{
@@ -84,12 +73,10 @@ const MySnackbar = (props) => {
         horizontal: 'left'
       }}
       open={props.open}
-      autoHideDuration={6000}
-      onClose={handleClose}
-      ref={snackbarRef}
+      autoHideDuration={2000}
     >
       <MySnackbarContentWrapper
-        onClose={handleClose}
+        onClose={props.handleClose}
         variant={props.variant}
         message={props.message}
         {...props}
