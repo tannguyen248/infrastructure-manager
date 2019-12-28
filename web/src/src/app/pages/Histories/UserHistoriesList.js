@@ -1,20 +1,44 @@
 import { CircularProgress } from '@material-ui/core';
-import Avatar from '@material-ui/core/Avatar';
 import Grid from '@material-ui/core/Grid';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemAvatar from '@material-ui/core/ListItemAvatar';
-import ListItemText from '@material-ui/core/ListItemText';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
-import React, { useEffect, useState, useContext } from 'react';
-import DeviceContext from '../../context/DeviceContext';
-import { withFirebase } from '../../../Firebase/context';
-import { useParams } from 'react-router-dom';
-import Button from '@material-ui/core/Button';
-import Lazyload from 'react-lazyload';
-import avatar from '../../../../src/static/images/Missing_avatar.png';
-// import { sortBy } from '../../helper';
 import _ from 'lodash';
+import Badge from '@material-ui/core/Badge';
+import React, { useEffect, useState, useMemo } from 'react';
+import { useParams } from 'react-router-dom';
+import { withFirebase } from '../../../Firebase/context';
+import CustomSkeleton from './Skeleton';
+import HistoryItem from './HistoryItem';
+import CustomAvatar from './Avatar';
+
+const StyledBadge = withStyles(theme => ({
+  badge: {
+    backgroundColor: '#44b700',
+    color: '#44b700',
+    boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+    '&::after': {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      borderRadius: '50%',
+      animation: '$ripple 1.2s infinite ease-in-out',
+      border: '1px solid currentColor',
+      content: '""'
+    }
+  },
+  '@keyframes ripple': {
+    '0%': {
+      transform: 'scale(.8)',
+      opacity: 1
+    },
+    '100%': {
+      transform: 'scale(2.4)',
+      opacity: 0
+    }
+  }
+}))(Badge);
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -40,10 +64,6 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const Loading = () => {
-  return <div>Loading</div>;
-};
-
 const UserHistoriesList = React.memo(({ firebase, auth, ...props }) => {
   const classes = useStyles();
   const [deviceHistory, setDeviceHistory] = useState([]);
@@ -63,7 +83,6 @@ const UserHistoriesList = React.memo(({ firebase, auth, ...props }) => {
           id: doc.id,
           ...doc.data()
         }));
-        console.log('history', histories);
         setDeviceHistory(histories);
       });
   }, []);
@@ -106,86 +125,86 @@ const UserHistoriesList = React.memo(({ firebase, auth, ...props }) => {
     });
   }, [deviceHistory]);
 
-  console.log('Devices', devices);
+  const sortedDevices = useMemo(() => {
+    return _.orderBy(
+      devices,
+      ['history.event', 'history.date'],
+      ['asc', 'desc']
+    );
+  }, [devices]);
 
   return (
     <>
-      {devices && devices.length !== 0 ? (
-        <Grid
-          className={classes.historyContainer}
-          container
-          direction='column'
-          justify='center'
-          alignItems='center'
-        >
-          <div>
-            <Typography variant='h1' component='h2' gutterBottom>
-              {name || deviceName}
-            </Typography>
-          </div>
-          {_.orderBy(devices, ['created_at'], 'desc').map((device, index) => {
-            return (
-              <HistoryItem
-                device={device}
-                classes={classes}
-                key={index}
-                avatar={avatar}
-                lg={6}
-                md={12}
-              />
-            );
-          })}
-        </Grid>
-      ) : (
-        <MyCircularProgress devices={devices}/>
-      )}
+      <Grid
+        className={classes.historyContainer}
+        container
+        direction='column'
+        justify='center'
+        alignItems='center'
+      >
+        <div>
+          <Typography variant='h1' component='h2' gutterBottom>
+            {name || deviceName}
+          </Typography>
+        </div>
+        <div style={{ marginBottom: '24px' }}>
+          <WhoKeepDevice sortedDevices={sortedDevices} classes={classes} />
+        </div>
+        {sortedDevices.map((device, index) => {
+          return (
+            <HistoryItem
+              device={device}
+              classes={classes}
+              key={index}
+              src={device.imageUrl}
+              lg={6}
+              md={12}
+            />
+          );
+        })}
+        {sortedDevices && sortedDevices.length === 0 && <CircularProgress />}
+      </Grid>
     </>
   );
 });
 
-const HistoryItem = ({avatar, device, classes,lg, md, ...props}) => {
+const WhoKeepDevice = ({
+  sortedDevices = [{ email: '' }],
+  classes,
+  ...props
+}) => {
   return (
-    <Grid
-        container
-        spacing={2}
-        className={classes.itemContainer}
-      >
-        <Grid item lg={lg} md={md} className={classes.listItem}>
-          <ListItem alignItems='flex-start'>
-            <Lazyload placeholder={<Loading />}>
-              <ListItemAvatar>
-                <Avatar alt='' src={avatar} />
-              </ListItemAvatar>
-            </Lazyload>
-            <ListItemText
-              primary={device.email}
-              secondary={
-                <React.Fragment>
-                  <Typography
-                    component='span'
-                    variant='body2'
-                    className={classes.inline}
-                    color='textPrimary'
-                  >
-                    {device.history.event} on
-                  </Typography>
-                  <Typography
-                    component='span'
-                    variant='body2'
-                    color='textPrimary'
-                  >
-                    {` ${device.history.date.toDate().toString()}`}
-                  </Typography>
-                </React.Fragment>
-              }
-            />
-          </ListItem>
-        </Grid>
-      </Grid>
+    <>
+      {sortedDevices && sortedDevices[0] && sortedDevices[0]['email'] ? (
+        <div>
+          <StyledBadge
+            overlap='circle'
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right'
+            }}
+            variant='dot'
+          >
+            <CustomAvatar imageUrl={sortedDevices[0]['imageUrl']} />
+          </StyledBadge>
+          <Typography
+            component='span'
+            variant='body2'
+            className={classes.inline}
+            color='textPrimary'
+          >
+            {` ${sortedDevices[0]['email']}`}
+          </Typography>
+          <Typography component='span' variant='body2' color='textPrimary'>
+            {` currently keep this device`}
+          </Typography>
+        </div>
+      ) : null}
+    </>
   );
-}
+};
 
-const MyCircularProgress = ({devices, ...props}) => {
+const MyCircularProgress = ({ devices, ...props }) => {
   const [noHistory, setNoHistory] = useState(false);
 
   useEffect(() => {
@@ -200,7 +219,7 @@ const MyCircularProgress = ({devices, ...props}) => {
     };
   });
 
-  return <>{noHistory ? <NoDeviceHistory /> : <CircularProgress />}  </>;
+  return <>{noHistory ? <NoDeviceHistory /> : <CircularProgress />} </>;
 };
 
 const NoDeviceHistory = () => {

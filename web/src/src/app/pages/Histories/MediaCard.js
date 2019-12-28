@@ -1,17 +1,13 @@
-import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardActionArea from '@material-ui/core/CardActionArea';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
-import Button from '@material-ui/core/Button';
+import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
-import LazyLoad from 'react-lazyload';
-import Skeleton from '@material-ui/lab/Skeleton';
-import appleLogo from '../../../../src/static/images/apple.png';
+import React from 'react';
 import androidLogo from '../../../../src/static/images/android.png';
-import { DeviceContext } from '../../context';
+import appleLogo from '../../../../src/static/images/apple.png';
 
 const useStyles = makeStyles({
   card: {
@@ -24,7 +20,6 @@ const useStyles = makeStyles({
     fontSize: '14px'
   }
 });
-const Loading = () => <div>Loading</div>;
 
 const MediaCard = React.memo(({ name, model, ...props }) => {
   const classes = useStyles();
